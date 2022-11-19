@@ -12,6 +12,8 @@ class King(Piece):
         self.is_king = True
 
         self.can_castle = True
+
+        self.check = False
         
 
     def move(self):
@@ -30,7 +32,24 @@ class King(Piece):
                         if chessboard[i][j].is_white != self.is_white:
                             possibile_moves.append((i,j))
 
+
+        
+        # castling
+        if self.can_castle and not self.check:
+            
+            if chessboard[0][pos[1]] != 0 and chessboard[0][pos[1]].can_castle:
+                if chessboard[1][pos[1]] == 0 and chessboard[2][pos[1]] == 0 and chessboard[3][pos[1]] == 0:
+                    
+                    possibile_moves.append((2,pos[1]))
+
+            if chessboard[7][pos[1]] != 0 and chessboard[7][pos[1]].can_castle:
+                if chessboard[5][pos[1]] == 0  and chessboard[6][pos[1]] == 0:
+                    
+                    possibile_moves.append((6,pos[1]))
+
         return possibile_moves
+
+    
 
     def render(self, screen, pos):
         sprite_rect = self.sprite.get_rect(center=pos)

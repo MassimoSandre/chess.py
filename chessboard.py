@@ -49,9 +49,9 @@ class Chessboard():
             return None
 
         if player_is_white:
-            return (self.board_width-x-1,self.board_height-y-1)
+            return (x,self.board_height-y-1)
         else:
-            return (x, y)
+            return (self.board_width-x-1, y)
 
     def remove_piece(self, pos):
         self.add_piece(pos, 0)
@@ -59,27 +59,63 @@ class Chessboard():
     def add_piece(self, pos, piece):
         self.pieces[pos[0]][pos[1]] = piece
 
-    def move_piece(self, starting_pos, destination_pos):
+    def move_piece(self, starting_pos, destination_pos, definitive=False, castling_check=False):
+        if castling_check:
+            if self.pieces[starting_pos[0]][starting_pos[1]].is_king and abs(starting_pos[0]-destination_pos[0]) == 2:
+                if starting_pos[0] < destination_pos[0]:
+                    self.add_piece((destination_pos[0]-1, destination_pos[1]), self.pieces[self.board_height-1][destination_pos[1]])
+                    self.remove_piece((self.board_width-1, destination_pos[1]))                    
+                else:
+                    self.add_piece((destination_pos[0]+1, destination_pos[1]), self.pieces[0][destination_pos[1]])
+                    self.remove_piece((0, destination_pos[1]))
+
         self.add_piece(destination_pos, self.pieces[starting_pos[0]][starting_pos[1]])
         self.remove_piece(starting_pos)
-        self.get_piece(destination_pos).move()
+        if definitive:
+            self.get_piece(destination_pos).move()
         
-    def get_piece_possibile_moves_raw(self, pos):
+    def get_piece_possible_moves_raw(self, pos):
         x = self.pieces[pos[0]][pos[1]].get_possibile_moves(self.pieces, (pos[0],pos[1]))
         
         return x
 
-    def get_piece_possibile_moves(self, pos):
+
+    def get_piece_possible_moves(self, pos):
+        
+        check_to_white = self.pieces[pos[0]][pos[1]].is_white
+        
+
+        if self.pieces[pos[0]][pos[1]].is_king:
+            self.pieces[pos[0]][pos[1]].check = False
+            if self.check_for_check(check_to_white):
+                self.pieces[pos[0]][pos[1]].check = True
         x = self.pieces[pos[0]][pos[1]].get_possibile_moves(self.pieces, (pos[0],pos[1]))
         result = []
+
         for e in x:
-            check_to_white = self.pieces[pos[0]][pos[1]].is_white
-            save_piece = self.pieces[e[0]][e[1]]
-            self.move_piece(pos, e)
-            if not self.check_for_check(check_to_white):
-                result.append(e)
-            self.move_piece(e, pos)
-            self.pieces[e[0]][e[1]] = save_piece
+            # check if the current move is castling
+            if self.pieces[pos[0]][pos[1]].is_king and abs(e[0]-pos[0]) == 2:
+                self.move_piece(pos, (e[0]+(pos[0]-e[0])//2,e[1]), False)
+                if not self.check_for_check(check_to_white):
+                    self.move_piece((e[0]+(pos[0]-e[0])//2,e[1]), pos, False)
+                    self.move_piece(pos, e, False)
+                    if not self.check_for_check(check_to_white):
+                        result.append(e)
+                    self.move_piece(e,pos, False)
+                else:
+                    self.move_piece((e[0]+(pos[0]-e[0])//2,e[1]), pos, False)
+
+                
+            else:
+                save_piece = self.pieces[e[0]][e[1]]
+                
+                self.move_piece(pos, e, False)
+                if not self.check_for_check(check_to_white):
+                    result.append(e)
+                
+                self.move_piece(e, pos, False)
+                self.pieces[e[0]][e[1]] = save_piece
+        
         return result
 
     def check_for_promotion(self, player_is_white):
@@ -100,20 +136,21 @@ class Chessboard():
             for i in range(self.board_width):
                 for j in range(self.board_height):
                     if self.pieces[i][j] != 0 and not self.pieces[i][j].is_white:
-                        x = self.get_piece_possibile_moves_raw((i,j))
-
+                        x = self.get_piece_possible_moves_raw((i,j))
                         for e in x:
                             if self.pieces[e[0]][e[1]] != 0 and self.pieces[e[0]][e[1]].is_king and self.pieces[e[0]][e[1]].is_white:
                                 return True
+            
         else:
             for i in range(self.board_width):
                 for j in range(self.board_height):
                     if self.pieces[i][j] != 0 and self.pieces[i][j].is_white:
-                        x = self.get_piece_possibile_moves_raw((i,j))
-
+                        x = self.get_piece_possible_moves_raw((i,j))
                         for e in x:
                             if self.pieces[e[0]][e[1]] != 0 and self.pieces[e[0]][e[1]].is_king and not self.pieces[e[0]][e[1]].is_white:
                                 return True
+
+        
         return False
 
     def check_for_checkmate(self, checkmate_to_white):
@@ -124,7 +161,7 @@ class Chessboard():
             for i in range(self.board_width):
                 for j in range(self.board_height):
                     if self.pieces[i][j] != 0 and self.pieces[i][j].is_white:
-                        x = self.get_piece_possibile_moves((i,j))
+                        x = self.get_piece_possible_moves((i,j))
 
                         if len(x) > 0:
                             return False
@@ -132,7 +169,7 @@ class Chessboard():
             for i in range(self.board_width):
                 for j in range(self.board_height):
                     if self.pieces[i][j] != 0 and not self.pieces[i][j].is_white:
-                        x = self.get_piece_possibile_moves((i,j))
+                        x = self.get_piece_possible_moves((i,j))
 
                         if len(x) > 0:
                             return False
@@ -203,10 +240,10 @@ class Chessboard():
             s.set_alpha(180)
             s.fill(color)
             if player_is_white:
-                x = self.pos_x + (self.board_width-c[0]-1)*self.cell_width
+                x = self.pos_x + c[0]*self.cell_width
                 y = self.pos_y + (self.board_height-c[1]-1)*self.cell_height
             else:
-                x = self.pos_x + c[0]*self.cell_width
+                x = self.pos_x + (self.board_width-c[0]-1)*self.cell_width
                 y = self.pos_y + c[1]*self.cell_height
 
             screen.blit(s, (x,y))
@@ -218,10 +255,11 @@ class Chessboard():
             s.set_alpha(100)
 
             if player_is_white:
-                x = self.pos_x + (self.board_width-c[0]-1)*self.cell_width
+                x = self.pos_x + c[0]*self.cell_width                 
                 y = self.pos_y + (self.board_height-c[1]-1)*self.cell_height
             else:
-                x = self.pos_x + c[0]*self.cell_width 
+                x = self.pos_x + (self.board_width-c[0]-1)*self.cell_width
+
                 y = self.pos_y + c[1]*self.cell_height
                 
 
@@ -242,9 +280,9 @@ class Chessboard():
         padding = self.board_padding
         
         if player_is_white ^ view_as_white:
-            promoting_cell = self.board_width-promoting_cell-1
             y = self.pos_y + (self.cell_height* (self.board_height-2))
         else:
+            promoting_cell = self.board_width-promoting_cell-1
             y = self.pos_y
 
         x = self.pos_x + promoting_cell*self.cell_width 
@@ -283,10 +321,10 @@ class Chessboard():
             for i in range(len(self.pieces)):
                 for j in range(len(self.pieces[i])):
                     if self.pieces[i][j] != 0 and not (i,j) in avoid:
-                        self.pieces[i][j].render(screen, (self.pos_x + (self.board_width-i-1)*self.cell_width + int(self.cell_width/2), self.pos_y + (self.board_height-j-1)*self.cell_height + int(self.cell_height/2)))
+                        self.pieces[i][j].render(screen, (self.pos_x + i*self.cell_width + int(self.cell_width/2), self.pos_y + (self.board_height-j-1)*self.cell_height + int(self.cell_height/2)))
 
         else:
             for i in range(len(self.pieces)):
                 for j in range(len(self.pieces[i])):
                     if self.pieces[i][j] != 0 and not (i,j) in avoid:
-                        self.pieces[i][j].render(screen, (self.pos_x + i*self.cell_width + int(self.cell_width/2), self.pos_y + j*self.cell_height + int(self.cell_height/2)))
+                        self.pieces[i][j].render(screen, (self.pos_x + (self.board_width-i-1)*self.cell_width + int(self.cell_width/2), self.pos_y + j*self.cell_height + int(self.cell_height/2)))

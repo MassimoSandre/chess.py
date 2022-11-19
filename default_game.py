@@ -33,10 +33,10 @@ def reset_board_to_default_game(board):
     board.add_piece((2,7),Bishop(BLACK))
     board.add_piece((5,7),Bishop(BLACK))
 
-    # Kings
-    board.add_piece((3,0),King(WHITE))
-    board.add_piece((3,7),King(BLACK))
-
     # Queens
-    board.add_piece((4,0),Queen(WHITE))
-    board.add_piece((4,7),Queen(BLACK))
+    board.add_piece((3,0),Queen(WHITE))
+    board.add_piece((3,7),Queen(BLACK))
+
+    # Kings
+    board.add_piece((4,0),King(WHITE))
+    board.add_piece((4,7),King(BLACK))
