@@ -39,9 +39,9 @@ class Chessboard():
             return None
 
         if player_is_white:
-            return (x, y)
-        else:
             return (7-x,7-y)
+        else:
+            return (x, y)
 
     def remove_piece(self, pos):
         self.add_piece(pos, 0)
@@ -74,12 +74,12 @@ class Chessboard():
     def check_for_promotion(self, player_is_white):
         if player_is_white:
             for i in range(8):
-                if self.pieces[i][0] != 0 and self.pieces[i][0].is_promotable:
-                    return (i,0)
-        else:
-            for i in range(8):
                 if self.pieces[i][7] != 0 and self.pieces[i][7].is_promotable:
                     return (7-i,0)
+        else:
+            for i in range(8):
+                if self.pieces[i][0] != 0 and self.pieces[i][0].is_promotable:
+                    return (i,0)
 
         return None
 
@@ -158,12 +158,11 @@ class Chessboard():
             s.set_alpha(180)
             s.fill(color)
             if player_is_white:
-                x = self.pos_x + c[0]*self.cell_width
-                y = self.pos_y + c[1]*self.cell_height
-            else:
                 x = self.pos_x + (7-c[0])*self.cell_width
                 y = self.pos_y + (7-c[1])*self.cell_height
-
+            else:
+                x = self.pos_x + c[0]*self.cell_width
+                y = self.pos_y + c[1]*self.cell_height
 
             screen.blit(s, (x,y))
 
@@ -176,12 +175,12 @@ class Chessboard():
             #s.fill((255,255,255))
 
             if player_is_white:
-                x = self.pos_x + c[0]*self.cell_width 
-                y = self.pos_y + c[1]*self.cell_height 
-
-            else:
                 x = self.pos_x + (7-c[0])*self.cell_width 
-                y = self.pos_y + (7-c[1])*self.cell_height 
+                y = self.pos_y + (7-c[1])*self.cell_height
+            else:
+                x = self.pos_x + c[0]*self.cell_width 
+                y = self.pos_y + c[1]*self.cell_height
+                
 
             if self.pieces[c[0]][c[1]] == 0:
                 pygame.draw.circle(s, (50,50,50), (int(self.cell_width/2), int(self.cell_height/2)), 14)
@@ -236,9 +235,10 @@ class Chessboard():
             for i in range(len(self.pieces)):
                 for j in range(len(self.pieces[i])):
                     if self.pieces[i][j] != 0 and not (i,j) in avoid:
-                        self.pieces[i][j].render(screen, (self.pos_x + i*self.cell_width + int(self.cell_width/2), self.pos_y + j*self.cell_height + int(self.cell_height/2)))
+                        self.pieces[i][j].render(screen, (self.pos_x + (7-i)*self.cell_width + int(self.cell_width/2), self.pos_y + (7-j)*self.cell_height + int(self.cell_height/2)))
+
         else:
             for i in range(len(self.pieces)):
                 for j in range(len(self.pieces[i])):
                     if self.pieces[i][j] != 0 and not (i,j) in avoid:
-                        self.pieces[i][j].render(screen, (self.pos_x + (7-i)*self.cell_width + int(self.cell_width/2), self.pos_y + (7-j)*self.cell_height + int(self.cell_height/2)))
+                        self.pieces[i][j].render(screen, (self.pos_x + i*self.cell_width + int(self.cell_width/2), self.pos_y + j*self.cell_height + int(self.cell_height/2)))

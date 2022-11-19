@@ -151,8 +151,7 @@ while running:
          texts = mainfont.render("It's your turn", False, (255,255,255))  
     offset_x = int(texts.get_rect().width/2)
     
-    #screen.blit(texts,(int(width/2)-offset_x, 10))
-
+    
     pygame.display.update()
     clock.tick(60)
 

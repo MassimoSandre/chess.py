@@ -13,7 +13,7 @@ class Pawn(Piece):
     def get_possibile_moves(self, chessboard, pos):
         possibile_moves = []
 
-        if self.is_white:
+        if not self.is_white:
             i = pos[0]
             j = pos[1]-1
             if i >= 0 and j >= 0 and i < len(chessboard) and  j < len(chessboard[i]):
