@@ -230,12 +230,18 @@ class Chessboard():
         self.pieces[i][j].render(screen, pos)
 
 
-    def render_promoting_ui(self, screen, player_is_white, promoting_cell):
+    def render_promoting_ui(self, screen, player_is_white, view_as_white, promoting_cell):
         padding = 10
         
 
+        if player_is_white ^ view_as_white:
+            promoting_cell = self.board_width-promoting_cell-1
+            y = self.pos_y + (self.cell_height* (self.board_height-2))
+        else:
+            y = self.pos_y
+
         x = self.pos_x + promoting_cell*self.cell_width 
-        y = self.pos_y
+        
         rect = pygame.Rect((x-padding,y-padding), (self.cell_width*2+padding*2, self.cell_width*2+padding*2))
         pygame.draw.rect(screen, (0,0,0), rect, 0)
         rect = pygame.Rect((x,y), (self.cell_width*2, self.cell_width*2))
