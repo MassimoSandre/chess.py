@@ -75,11 +75,11 @@ class Chessboard():
         if player_is_white:
             for i in range(8):
                 if self.pieces[i][7] != 0 and self.pieces[i][7].is_promotable:
-                    return (7-i,0)
+                    return 7-i
         else:
             for i in range(8):
                 if self.pieces[i][0] != 0 and self.pieces[i][0].is_promotable:
-                    return (i,0)
+                    return i
 
         return None
 
@@ -199,8 +199,8 @@ class Chessboard():
         padding = 10
         
 
-        x = self.pos_x + promoting_cell[0]*self.cell_width 
-        y = self.pos_y + promoting_cell[1]*self.cell_height
+        x = self.pos_x + promoting_cell*self.cell_width 
+        y = self.pos_y
         rect = pygame.Rect((x-padding,y-padding), (self.cell_width*2+padding*2, self.cell_width*2+padding*2))
         pygame.draw.rect(screen, (0,0,0), rect, 0)
         rect = pygame.Rect((x,y), (self.cell_width*2, self.cell_width*2))

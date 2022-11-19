@@ -38,7 +38,7 @@ is_white_turn = True
 turn_switching = False
 
 promoting = False
-promoting_cell = (0,0)
+promoting_cell = 0
 
 dragging = False
 starting = 0
@@ -56,19 +56,20 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1: 
                 if promoting:
-                    # check which new pieces the users has selected
-                    clicked_cell = board.get_cell_by_position(event.pos, True)
-                    x = (clicked_cell[0]-promoting_cell[0], clicked_cell[1]-promoting_cell[1])
+                    # check which new piece the user has selected
+                    clicked_cell = board.get_cell_by_position(event.pos, False)
+                    
+                    x = (clicked_cell[0]-promoting_cell, clicked_cell[1])
                     
                     if player_is_white:
-                        cell_to_update = promoting_cell
+                        cell_to_update = (7-promoting_cell,7)
                     else:
-                        cell_to_update = (7-promoting_cell[0],7)
+                        cell_to_update = promoting_cell
 
                     promoting = False
                     if x == (0,0):
                         if not player_is_white:
-                            promoting_cell = ()
+                            promoting_cell = 0
                         board.add_piece(cell_to_update, Queen(board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
                         pass
                     elif x == (1,0):
@@ -151,7 +152,7 @@ while running:
          texts = mainfont.render("It's your turn", False, (255,255,255))  
     offset_x = int(texts.get_rect().width/2)
     
-    
+
     pygame.display.update()
     clock.tick(60)
 
