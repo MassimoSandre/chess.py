@@ -9,18 +9,18 @@ class Bishop(Piece):
             self.sprite = pygame.image.load('images/blackbishop.png').convert_alpha()
         Piece.__init__(self=self,is_white=is_white)
 
-    def get_possibile_moves(self, chessboard, pos):
-        possibile_moves = []
+    def get_possible_moves(self, chessboard, pos):
+        possible_moves = []
 
         i = pos[0]-1
         j = pos[1]-1
 
         while i >= 0 and j >= 0:
             if chessboard[i][j] == 0:
-                possibile_moves.append((i,j))
+                possible_moves.append((i,j))
             else:
                 if self.is_white ^ chessboard[i][j].is_white:
-                    possibile_moves.append((i,j))
+                    possible_moves.append((i,j))
                 break
             i = i - 1
             j = j - 1
@@ -30,10 +30,10 @@ class Bishop(Piece):
 
         while i < len(chessboard) and j >= 0:
             if chessboard[i][j] == 0:
-                possibile_moves.append((i,j))
+                possible_moves.append((i,j))
             else:
                 if self.is_white ^ chessboard[i][j].is_white:
-                    possibile_moves.append((i,j))
+                    possible_moves.append((i,j))
                 break
             i = i + 1
             j = j - 1
@@ -43,10 +43,10 @@ class Bishop(Piece):
 
         while i < len(chessboard) and j < len(chessboard[i]):
             if chessboard[i][j] == 0:
-                possibile_moves.append((i,j))
+                possible_moves.append((i,j))
             else:
                 if self.is_white ^ chessboard[i][j].is_white:
-                    possibile_moves.append((i,j))
+                    possible_moves.append((i,j))
                 break
             i = i + 1
             j = j + 1
@@ -56,16 +56,16 @@ class Bishop(Piece):
 
         while i >= 0 and j < len(chessboard[i]):
             if chessboard[i][j] == 0:
-                possibile_moves.append((i,j))
+                possible_moves.append((i,j))
             else:
                 if self.is_white ^ chessboard[i][j].is_white:
-                    possibile_moves.append((i,j))
+                    possible_moves.append((i,j))
                 break
             i = i - 1
             j = j + 1
         
 
-        return possibile_moves
+        return possible_moves
 
     def render(self, screen, pos):
         sprite_rect = self.sprite.get_rect(center=pos)

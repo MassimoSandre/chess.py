@@ -59,7 +59,7 @@ class Chessboard():
     def add_piece(self, pos, piece):
         self.pieces[pos[0]][pos[1]] = piece
 
-    def move_piece(self, starting_pos, destination_pos, definitive=False, castling_check=False):
+    def move_piece(self, starting_pos, destination_pos, definitive=False, castling_check=False, en_passant=False):
         if castling_check:
             if self.pieces[starting_pos[0]][starting_pos[1]].is_king and abs(starting_pos[0]-destination_pos[0]) == 2:
                 if starting_pos[0] < destination_pos[0]:
@@ -69,13 +69,24 @@ class Chessboard():
                     self.add_piece((destination_pos[0]+1, destination_pos[1]), self.pieces[0][destination_pos[1]])
                     self.remove_piece((0, destination_pos[1]))
 
+        if en_passant:
+            if self.pieces[starting_pos[0]][starting_pos[1]].is_promotable and starting_pos[0] != destination_pos[0] and self.pieces[destination_pos[0]][destination_pos[1]] == 0:
+                self.remove_piece((destination_pos[0], starting_pos[1]))
+
+
         self.add_piece(destination_pos, self.pieces[starting_pos[0]][starting_pos[1]])
         self.remove_piece(starting_pos)
         if definitive:
             self.get_piece(destination_pos).move()
+            for i in range(self.board_width):
+                for j in range(self.board_height):
+                    if self.pieces[i][j] != 0:
+                        self.pieces[i][j].can_be_captured_en_passant = False
+            if self.pieces[destination_pos[0]][destination_pos[1]].is_promotable and abs(starting_pos[1]-destination_pos[1]) == 2:
+                self.pieces[destination_pos[0]][destination_pos[1]].can_be_captured_en_passant = True
         
     def get_piece_possible_moves_raw(self, pos):
-        x = self.pieces[pos[0]][pos[1]].get_possibile_moves(self.pieces, (pos[0],pos[1]))
+        x = self.pieces[pos[0]][pos[1]].get_possible_moves(self.pieces, (pos[0],pos[1]))
         
         return x
 
@@ -89,7 +100,7 @@ class Chessboard():
             self.pieces[pos[0]][pos[1]].check = False
             if self.check_for_check(check_to_white):
                 self.pieces[pos[0]][pos[1]].check = True
-        x = self.pieces[pos[0]][pos[1]].get_possibile_moves(self.pieces, (pos[0],pos[1]))
+        x = self.pieces[pos[0]][pos[1]].get_possible_moves(self.pieces, (pos[0],pos[1]))
         result = []
 
         for e in x:
@@ -105,7 +116,16 @@ class Chessboard():
                 else:
                     self.move_piece((e[0]+(pos[0]-e[0])//2,e[1]), pos, False)
 
+            elif self.pieces[pos[0]][pos[1]].is_promotable and e[0] != pos[0] and self.pieces[e[0]][e[1]] == 0:
+                save_piece = self.pieces[e[0]][pos[1]]
+                self.remove_piece((e[0],pos[1]))
+
+                self.move_piece(pos, e, False)
+                if not self.check_for_check(check_to_white):
+                    result.append(e)
                 
+                self.move_piece(e, pos, False)
+                self.pieces[e[0]][pos[1]] = save_piece
             else:
                 save_piece = self.pieces[e[0]][e[1]]
                 
@@ -248,7 +268,7 @@ class Chessboard():
 
             screen.blit(s, (x,y))
 
-    def render_possibile_moves_cells(self, screen, player_is_white, cells):
+    def render_possible_moves_cells(self, screen, player_is_white, cells):
         for c in cells:
             s = pygame.Surface((self.cell_width, self.cell_height), pygame.SRCALPHA,32)
             s = s.convert_alpha()

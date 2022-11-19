@@ -19,18 +19,18 @@ class King(Piece):
     def move(self):
         self.can_castle = False
 
-    def get_possibile_moves(self, chessboard, pos):
-        possibile_moves = []
+    def get_possible_moves(self, chessboard, pos):
+        possible_moves = []
 
         for i in range(pos[0]-1, pos[0]+2):
             for j in range(pos[1]-1, pos[1]+2):
                 if i >= 0 and j >= 0 and i < len(chessboard) and j < len(chessboard[0]):
                     # I'm not checking if the new position is safe
                     if chessboard[i][j] == 0:
-                        possibile_moves.append((i,j))
+                        possible_moves.append((i,j))
                     else:
                         if chessboard[i][j].is_white != self.is_white:
-                            possibile_moves.append((i,j))
+                            possible_moves.append((i,j))
 
 
         
@@ -40,14 +40,14 @@ class King(Piece):
             if chessboard[0][pos[1]] != 0 and chessboard[0][pos[1]].can_castle:
                 if chessboard[1][pos[1]] == 0 and chessboard[2][pos[1]] == 0 and chessboard[3][pos[1]] == 0:
                     
-                    possibile_moves.append((2,pos[1]))
+                    possible_moves.append((2,pos[1]))
 
             if chessboard[7][pos[1]] != 0 and chessboard[7][pos[1]].can_castle:
                 if chessboard[5][pos[1]] == 0  and chessboard[6][pos[1]] == 0:
                     
-                    possibile_moves.append((6,pos[1]))
+                    possible_moves.append((6,pos[1]))
 
-        return possibile_moves
+        return possible_moves
 
     
 

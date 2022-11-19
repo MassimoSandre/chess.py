@@ -103,7 +103,7 @@ while running:
                 dragging = False
                 release_cell = board.get_cell_by_position(event.pos, view_as_white)
                 if release_cell in board.get_piece_possible_moves(starting_cell):
-                    board.move_piece(starting_cell, release_cell, definitive=True, castling_check=True)
+                    board.move_piece(starting_cell, release_cell, definitive=True, castling_check=True, en_passant=True)
                     turn_switching = True
                     moved_piece = release_cell
                     last_move = [starting_cell, release_cell]
@@ -148,7 +148,7 @@ while running:
     if dragging:
         pr = board.get_piece_possible_moves(starting_cell)
 
-        board.render_possibile_moves_cells(screen, view_as_white, pr)
+        board.render_possible_moves_cells(screen, view_as_white, pr)
         
         board.render_pieces(screen, view_as_white,[starting_cell])
         board.render_dragging_piece(screen, starting_cell, pygame.mouse.get_pos())

@@ -7,12 +7,13 @@ class Piece():
         self.is_king = False
         self.can_castle = False
         self.original_sprite_size = (self.sprite.get_rect().width, self.sprite.get_rect().height)
+        self.can_be_captured_en_passant = False
         
 
     def move(self):
         pass
 
-    def get_possibile_moves(self, chessboard, pos):
+    def get_possible_moves(self, chessboard, pos):
         return []
 
     def scale_by(self, factor):
