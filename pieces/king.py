@@ -10,6 +10,11 @@ class King(Piece):
             self.sprite = pygame.image.load('images/blackking.png').convert_alpha()
         self.is_king = True
 
+        self.can_castle = True
+
+    def move(self):
+        self.can_castle = False
+
     def get_possibile_moves(self, chessboard, pos):
         possibile_moves = []
 

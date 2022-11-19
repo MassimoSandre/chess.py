@@ -9,6 +9,11 @@ class Rook(Piece):
         else:
             self.sprite = pygame.image.load('images/blackrook.png').convert_alpha()
 
+        self.can_castle = True
+
+    def move(self):
+        self.can_castle = False
+
     def get_possibile_moves(self, chessboard, pos):
         possibile_moves = []
 
