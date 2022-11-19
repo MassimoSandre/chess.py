@@ -3,12 +3,11 @@ from pieces.piece import Piece
 
 class Bishop(Piece):
     def __init__(self, is_white):
-        Piece.__init__(self=self,is_white=is_white)
         if is_white:
             self.sprite = pygame.image.load('images/whitebishop.png').convert_alpha()
         else:
             self.sprite = pygame.image.load('images/blackbishop.png').convert_alpha()
-       
+        Piece.__init__(self=self,is_white=is_white)
 
     def get_possibile_moves(self, chessboard, pos):
         possibile_moves = []

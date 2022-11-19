@@ -3,11 +3,11 @@ from pieces.piece import Piece
 
 class Rook(Piece):
     def __init__(self, is_white):
-        Piece.__init__(self=self,is_white=is_white)
         if is_white:
             self.sprite = pygame.image.load('images/whiterook.png').convert_alpha()
         else:
             self.sprite = pygame.image.load('images/blackrook.png').convert_alpha()
+        Piece.__init__(self=self,is_white=is_white)
 
         self.can_castle = True
 

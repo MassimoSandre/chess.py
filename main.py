@@ -1,25 +1,24 @@
 import pygame, sys
 from pygame.locals import *
 from chessboard import Chessboard
-from pieces.piece import Piece
-from pieces.king import King
 from pieces.rook import Rook
 from pieces.bishop import Bishop
 from pieces.knight import Knight
-from pieces.pawn import Pawn
 from pieces.queen import Queen
 import default_game as default
 
 
-size = width, height = 800, 720
+size = width, height = 800, 800
 
 colors = {'white': (255,255,255), 'black': (0,0,0), 'blue': (0,0,255), 'red': (255,0,0)}
 
 grid_size = (8,8)
-board = Chessboard((int((width-600))/2,int((height-600)/2)+0), grid_size, (75,75))
+cell_size = 75
+board_padding = 10
+board = Chessboard((height//2,height//2), grid_size, cell_size, board_padding)
 board.set_colors((75, 81, 152), (151, 147, 204))
 
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size, pygame.RESIZABLE)
 pygame.display.set_caption('Sandretti\'s chess')
 pygame.font.init()
 
@@ -47,7 +46,7 @@ moved_piece = (0,0)
 
 last_move = []
 
-mainfont = pygame.font.SysFont('Comic Sans MS', 50)
+mainfont = pygame.font.SysFont('Arial', 50)
 
 while running:
     for event in pygame.event.get():
@@ -100,7 +99,7 @@ while running:
         
         if event.type == pygame.MOUSEBUTTONUP:
             if(dragging):
-                #print(starting_cell)
+                
                 dragging = False
                 release_cell = board.get_cell_by_position(event.pos, view_as_white)
                 if release_cell in board.get_piece_possibile_moves(starting_cell):
@@ -125,6 +124,21 @@ while running:
         view_as_white = is_white_turn
         turn_switching = False
 
+    size = width,height = pygame.display.get_surface().get_size()
+
+    board.set_pos((width//2, height//2))
+
+    short_side = min(width, height-150)
+
+    if short_side == width:
+        cell_size = (short_side - (2*board_padding))//grid_size[0]
+    else:
+        cell_size = (short_side - (2*board_padding))//grid_size[1]
+    
+    cell_size = min(max(cell_size,75), 100)
+
+    board.set_cell_size(cell_size)
+
     # --- RENDER ---
     screen.fill(colors['black'])
     board.render(screen, view_as_white)
@@ -144,12 +158,17 @@ while running:
     if promoting:
         board.render_promoting_ui(screen, is_white_turn,view_as_white, promoting_cell)
 
-    if view_as_white ^ is_white_turn:
-        texts = mainfont.render("It's your opponent's turn", False, (255,255,255))
+    if is_white_turn:
+        texts = mainfont.render("It's White's turn", True, (255,255,255))
     else:
-        texts = mainfont.render("It's your turn", False, (255,255,255))  
-    offset_x = int(texts.get_rect().width/2)
-    
+        texts = mainfont.render("It's Black's turn", True, (255,255,255))  
+    offset_x = texts.get_rect().width//2
+    offset_y = texts.get_rect().height//2
+
+    text_x = width//2 - offset_x
+    text_y = (height - (grid_size[1]*cell_size))//4 - offset_y
+
+    screen.blit(texts, (text_x,text_y))
 
     pygame.display.update()
     clock.tick(60)

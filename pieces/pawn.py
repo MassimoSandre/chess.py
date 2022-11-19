@@ -3,11 +3,11 @@ from pieces.piece import Piece
 
 class Pawn(Piece):
     def __init__(self, is_white):
-        Piece.__init__(self=self,is_white=is_white)
         if is_white:
             self.sprite = pygame.image.load('images/whitepawn.png').convert_alpha()
         else:
             self.sprite = pygame.image.load('images/blackpawn.png').convert_alpha()
+        Piece.__init__(self=self,is_white=is_white)
         self.is_promotable = True
 
     def get_possibile_moves(self, chessboard, pos):
