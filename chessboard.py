@@ -52,6 +52,7 @@ class Chessboard():
     def move_piece(self, starting_pos, destination_pos):
         self.add_piece(destination_pos, self.pieces[starting_pos[0]][starting_pos[1]])
         self.remove_piece(starting_pos)
+        self.get_piece(destination_pos).move()
         
     def get_piece_possibile_moves_raw(self, pos):
         x = self.pieces[pos[0]][pos[1]].get_possibile_moves(self.pieces, (pos[0],pos[1]))
@@ -126,9 +127,6 @@ class Chessboard():
                         if len(x) > 0:
                             return False
         return True
-
-
-
 
     def render(self, screen):
         padding = 10
