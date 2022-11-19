@@ -108,7 +108,6 @@ while running:
                     last_move = [starting_cell, release_cell]
             
 
-
     # --- UPDATE ---
     x = board.check_for_promotion(player_is_white)
     
@@ -117,7 +116,6 @@ while running:
         promoting_cell = x
 
     if not promoting and turn_switching:
-        #print(board.check_for_checkmate(not player_is_white))
         if board.check_for_checkmate(not player_is_white):
             print("CHECKMATE")
             running = False
@@ -127,7 +125,7 @@ while running:
 
     # --- RENDER ---
     screen.fill(colors['black'])
-    board.render(screen)
+    board.render(screen, player_is_white)
 
     board.render_highlighted_cells(screen, player_is_white, last_move,(40,255,40))
 
@@ -141,15 +139,13 @@ while running:
     else:
         board.render_pieces(screen, player_is_white)
 
-    
-
     if promoting:
         board.render_promoting_ui(screen, player_is_white, promoting_cell)
 
     if player_is_white ^ is_white_turn:
         texts = mainfont.render("It's your opponent's turn", False, (255,255,255))
     else:
-         texts = mainfont.render("It's your turn", False, (255,255,255))  
+        texts = mainfont.render("It's your turn", False, (255,255,255))  
     offset_x = int(texts.get_rect().width/2)
     
 

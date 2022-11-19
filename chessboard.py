@@ -128,7 +128,7 @@ class Chessboard():
                             return False
         return True
 
-    def render(self, screen):
+    def render(self, screen, player_is_white):
         padding = 10
         rect = pygame.Rect((self.pos_x-padding,self.pos_y-padding),(self.cell_width*self.board_width+padding*2,self.cell_height*self.board_height+padding*2))
         pygame.draw.rect(screen,self.color_1 , rect, 0, 0, 10,10,10,10)
@@ -149,6 +149,43 @@ class Chessboard():
                     color = self.color_2
 
                 pygame.draw.rect(screen, color, rect, 0)
+        
+        font = pygame.font.SysFont('Arial', 16)
+        
+        padding = 5
+        x = self.pos_x + padding
+        for i in range(self.board_height):
+            y = self.pos_y + i*self.cell_height + padding
+            if i%2 == 1:
+                color = self.color_2
+            else:
+                color = self.color_1
+                
+            if player_is_white:
+                txt = font.render(str(self.board_height - i), True, color)
+            else:
+                txt = font.render(str(i+1), True, color)
+
+            screen.blit(txt, (x,y))
+
+        for i in range(self.board_width):
+            if i%2 == 1:
+                color = self.color_1
+            else:
+                color = self.color_2
+
+            if player_is_white:
+                txt = font.render(chr(97+i), True, color)
+            else:
+                txt = font.render(chr(97+self.board_width-i-1), True, color)
+
+            rect = txt.get_rect()
+
+            x = self.pos_x + (i+1)*self.cell_height - padding - rect.width
+            y = self.pos_y + self.board_height*self.cell_height - padding -rect.height
+
+            screen.blit(txt, (x,y))
+            
 
     def render_highlighted_cells(self, screen, player_is_white, cells, color):
         for c in cells:
