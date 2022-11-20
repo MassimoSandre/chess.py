@@ -6,11 +6,13 @@ from pieces.queen import Queen
 from pieces.rook import Rook
 from pieces.knight import Knight
 from pieces.bishop import Bishop
+from timer import Timer
 
 class ChessGame:
-    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size) -> None:
+    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10) -> None:
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
         self.__board.set_colors(*board_colors)
+        self.__margin = margin
         self.reset_game()
 
     def set_colors(self, boards_colors):
@@ -42,6 +44,9 @@ class ChessGame:
         self.__drawing = False
         self.__selected_cells = []
         self.__arrows = []
+
+        self.__white_timer = Timer()
+        self.__black_timer = Timer()
 
     def reset_game(self):
         self.__variables_reset()
@@ -175,7 +180,7 @@ class ChessGame:
                     else:
                         self.__selected_cells.append(clicked_cell)
 
-    def update(self):
+    def update(self, time_lapsed):
         game_ended = True
         x = self.__board.check_for_promotion(self.__is_white_turn)
         
@@ -186,13 +191,24 @@ class ChessGame:
         if not self.__promoting and self.__turn_switching:
             if self.__board.check_for_checkmate(not self.__view_as_white):
                 game_ended = False
+
+            if self.__is_white_turn:
+                self.__white_timer.make_move()
+            else:
+                self.__black_timer.make_move()
             self.__is_white_turn = not self.__is_white_turn
             self.__view_as_white = self.__is_white_turn
             self.__turn_switching = False
 
+        
+        if self.__is_white_turn:
+            self.__white_timer.update(time_lapsed)
+        else:
+            self.__black_timer.update(time_lapsed)
+
         return game_ended
 
-    def render(self, screen, mouse_position):
+    def render(self, screen, mouse_position, timer_font):
         self.__board.render(screen, self.__view_as_white)
 
         self.__board.render_highlighted_cells(screen, self.__view_as_white, self.__last_move, (40, 255, 40))
@@ -213,3 +229,20 @@ class ChessGame:
         if self.__promoting:
             self.__board.render_promoting_ui(screen, self.__is_white_turn,self.__view_as_white, self.__promoting_cell)
 
+        top_timer_pos = list(self.__board.get_rect().topright)
+        top_timer_pos[0]-=self.__white_timer.get_width()
+        top_timer_pos[1]-=self.__white_timer.get_height()+self.__margin
+
+        bottom_timer_pos = list(self.__board.get_rect().bottomright)
+        bottom_timer_pos[0]-=self.__white_timer.get_width()
+        bottom_timer_pos[1]+=self.__margin
+
+        if self.__view_as_white:
+            self.__white_timer.render(screen, bottom_timer_pos, timer_font)
+            self.__black_timer.render(screen, top_timer_pos, timer_font)
+        else:
+            self.__white_timer.render(screen, top_timer_pos, timer_font)
+            self.__black_timer.render(screen, bottom_timer_pos, timer_font)
+
+
+        

@@ -10,7 +10,6 @@ import default_game as default
 # - sounds
 # - AI (stockfish 15)
 # - sort of evaluation
-# - timer and time control
 # - collapse the online chess.py repository in here
 #
 # LOW PRIORITY
@@ -18,6 +17,7 @@ import default_game as default
 
 # NOTE
 # Remember ReiettoAyanami to do this in Rust
+
 
 def main():
     # --- SETTINGS ---
@@ -35,8 +35,11 @@ def main():
 
     running = True
     game_ended = False
-    mainfont = pygame.font.SysFont('Arial', 50)
-    
+    mainfont = pygame.font.SysFont('Arial', 35)
+    ready = False
+    last_update = 0 
+    time_lapsed = 0
+
     while running:
         if game_ended:
             game_ended = False
@@ -62,7 +65,11 @@ def main():
                 
 
         # --- UPDATE ---
-        game_ended = not game.update()
+        if ready:
+            time_lapsed = (pygame.time.get_ticks() - last_update)/1000
+            last_update = pygame.time.get_ticks()
+
+        game_ended = not game.update(time_lapsed)
         size = width,height = pygame.display.get_surface().get_size()
         game.set_chessboard_position((width//2, height//2))
         
@@ -76,7 +83,7 @@ def main():
 
         # --- RENDER ---
         screen.fill(colors['black'])
-        game.render(screen,pygame.mouse.get_pos())
+        game.render(screen,pygame.mouse.get_pos(), mainfont)
 
         if game.get_current_turn():
             texts = mainfont.render("It's White's turn", True, (255,255,255))
@@ -93,7 +100,9 @@ def main():
         pygame.display.update()
         clock.tick(60)
 
-
+        if not ready:
+            ready = True
+            last_update = pygame.time.get_ticks()
     pygame.quit()
     sys.exit()
 

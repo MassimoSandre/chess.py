@@ -21,6 +21,9 @@ class Chessboard():
                 temp.append(0)
             self.pieces.append(temp)
 
+    def get_rect(self):
+        return pygame.Rect(self.pos_x-self.board_padding, self.pos_y-self.board_padding, self.board_width*self.cell_width+2*self.board_padding, self.board_height*self.cell_height+2*self.board_padding)
+
     def set_pos(self, pos):
         self.pos_x, self.pos_y = pos
         self.pos_x -= int((self.board_width/2) * self.cell_width)
