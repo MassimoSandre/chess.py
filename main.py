@@ -77,6 +77,8 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1: 
+                arrows = []
+                selected_cells = []
                 if promoting:
                     # check which new piece the user has selected
                     clicked_cell = board.get_cell_by_position(event.pos, False, False)
@@ -170,8 +172,6 @@ while running:
         is_white_turn = not is_white_turn
         view_as_white = is_white_turn
         turn_switching = False
-        arrows = []
-        selected_cells = []
 
     size = width,height = pygame.display.get_surface().get_size()
 
@@ -204,6 +204,8 @@ while running:
         board.render_dragging_piece(screen, starting_cell, pygame.mouse.get_pos())
     else:
         board.render_pieces(screen, view_as_white)
+
+    board.render_arrows(screen, view_as_white, arrows, (255,127,80))
 
     if promoting:
         board.render_promoting_ui(screen, is_white_turn,view_as_white, promoting_cell)

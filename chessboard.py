@@ -1,6 +1,8 @@
 import pygame
+import math
 from pieces.piece import Piece
 from pieces.king import King
+
 
 class Chessboard():
     def __init__(self, pos, board_size , cell_size, board_padding=10):
@@ -348,3 +350,83 @@ class Chessboard():
                 for j in range(len(self.pieces[i])):
                     if self.pieces[i][j] != 0 and not (i,j) in avoid:
                         self.pieces[i][j].render(screen, (self.pos_x + (self.board_width-i-1)*self.cell_width + int(self.cell_width/2), self.pos_y + j*self.cell_height + int(self.cell_height/2)))
+
+
+    def render_arrows(self, screen, player_is_white, arrows, color, arrows_alpha=100):
+        s = pygame.Surface((self.cell_width*self.board_width, self.cell_width*self.board_height), pygame.SRCALPHA)
+        s.fill((255,255,255,0))
+
+        for a in arrows:
+            ax,ay,bx,by = a
+
+            base_length = 20
+            arrow_base_2_length = 40
+            starting_cell_center = (self.cell_width*(ax+0.5), (self.cell_height*self.board_height)-(self.cell_height*(ay+0.5)))
+            destination_cell_center = (self.cell_width*(bx+0.5), (self.cell_height*self.board_height)-(self.cell_height*(by+0.5)))
+            base_center_distance_from_cell_center = self.cell_width/3
+            
+            if (abs(ax - bx) == 2 and abs(ay - by) == 1):
+                # horse jump arrow (horizontal)
+                base_center = (starting_cell_center[0] - base_center_distance_from_cell_center*((ax-bx)/abs(ax-bx)), starting_cell_center[1] )
+                base_point_1 = (base_center[0], base_center[1] - base_length/2)
+                base_point_2 = (base_center[0], base_center[1] + base_length/2)
+
+                arrow_bases_center = (destination_cell_center[0], destination_cell_center[1] - base_center_distance_from_cell_center*((ay-by)/abs(ay-by)))
+                arrow_base_1_point_1 = (arrow_bases_center[0] - base_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)), arrow_bases_center[1])
+                arrow_base_1_point_2 = (arrow_bases_center[0] + base_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)), arrow_bases_center[1])
+                arrow_base_2_point_1 = (arrow_bases_center[0] - arrow_base_2_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)), arrow_bases_center[1])
+                arrow_base_2_point_2 = (arrow_bases_center[0] + arrow_base_2_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)), arrow_bases_center[1])
+
+                turn_cell_center = (destination_cell_center[0], starting_cell_center[1])
+                
+                turn_point_1 = (turn_cell_center[0] - (base_length/2)*((bx-ax)/abs(bx-ax))*((by-ay)/abs(by-ay)) , turn_cell_center[1] - (base_length/2))
+                turn_point_2 = (turn_cell_center[0] + (base_length/2)*((bx-ax)/abs(bx-ax))*((by-ay)/abs(by-ay)) , turn_cell_center[1] + (base_length/2))
+
+                pygame.draw.polygon(s, (*color, arrows_alpha), [turn_point_2, base_point_2, base_point_1, turn_point_1, arrow_base_1_point_1, arrow_base_2_point_1, destination_cell_center, arrow_base_2_point_2, arrow_base_1_point_2])
+            elif (abs(ax - bx) == 1 and abs(ay - by) == 2):
+                # horse jump arrow (vertical)
+                base_center = (starting_cell_center[0], starting_cell_center[1] + base_center_distance_from_cell_center*((ay-by)/abs(ay-by)))
+                base_point_1 = (base_center[0] + base_length/2, base_center[1])
+                base_point_2 = (base_center[0] - base_length/2, base_center[1])
+
+                arrow_bases_center = (destination_cell_center[0] + base_center_distance_from_cell_center*((ax-bx)/abs(ax-bx)), destination_cell_center[1])
+                arrow_base_1_point_1 = (arrow_bases_center[0], arrow_bases_center[1]+base_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)))
+                arrow_base_1_point_2 = (arrow_bases_center[0], arrow_bases_center[1]-base_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)))
+                arrow_base_2_point_1 = (arrow_bases_center[0], arrow_bases_center[1]+arrow_base_2_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)))
+                arrow_base_2_point_2 = (arrow_bases_center[0], arrow_bases_center[1]-arrow_base_2_length/2*((ax-bx)/abs(ax-bx))*((ay-by)/abs(ay-by)))
+
+                turn_cell_center = (starting_cell_center[0], destination_cell_center[1])
+                
+                turn_point_1 = (turn_cell_center[0] + (base_length/2), turn_cell_center[1] + (base_length/2)*((bx-ax)/abs(bx-ax))*((by-ay)/abs(by-ay)))
+                turn_point_2 = (turn_cell_center[0] - (base_length/2), turn_cell_center[1] - (base_length/2)*((bx-ax)/abs(bx-ax))*((by-ay)/abs(by-ay)))
+
+                pygame.draw.polygon(s, (*color, arrows_alpha), [turn_point_2, base_point_2, base_point_1, turn_point_1, arrow_base_1_point_1, arrow_base_2_point_1, destination_cell_center, arrow_base_2_point_2, arrow_base_1_point_2])
+            else:
+                # straight arrow
+                arrow_length = math.sqrt((ax-bx)**2 + (ay-by)**2)
+                sin = (by-ay)/arrow_length
+                cos = (bx-ax)/arrow_length
+                
+                if sin != 0:
+                    angle = (sin/abs(sin))*math.acos(cos)
+                else:
+                    angle = math.acos(cos)
+                base_slope_angle = angle - (math.pi/2)
+                                
+                base_center = (starting_cell_center[0] + math.cos(angle)*base_center_distance_from_cell_center, starting_cell_center[1] - math.sin(angle)*base_center_distance_from_cell_center)
+
+                base_point_1 = (base_center[0] + math.cos(base_slope_angle)*(base_length/2), base_center[1] - math.sin(base_slope_angle)*(base_length/2))
+                base_point_2 = (base_center[0] + math.cos(base_slope_angle + math.pi)*(base_length/2), base_center[1] - math.sin(base_slope_angle + math.pi)*(base_length/2))
+
+                arrow_bases_center = (destination_cell_center[0] + math.cos(angle+math.pi)*base_center_distance_from_cell_center, destination_cell_center[1] - math.sin(angle+math.pi)*base_center_distance_from_cell_center)
+
+                arrow_base_1_point_1 = (arrow_bases_center[0] + math.cos(base_slope_angle)*(base_length/2), arrow_bases_center[1] - math.sin(base_slope_angle)*(base_length/2))
+                arrow_base_1_point_2 = (arrow_bases_center[0] + math.cos(base_slope_angle + math.pi)*(base_length/2), arrow_bases_center[1] - math.sin(base_slope_angle + math.pi)*(base_length/2))
+                arrow_base_2_point_1 = (arrow_bases_center[0] + math.cos(base_slope_angle)*(arrow_base_2_length/2), arrow_bases_center[1] - math.sin(base_slope_angle)*(arrow_base_2_length/2))
+                arrow_base_2_point_2 = (arrow_bases_center[0] + math.cos(base_slope_angle + math.pi)*(arrow_base_2_length/2), arrow_bases_center[1] - math.sin(base_slope_angle + math.pi)*(arrow_base_2_length/2))
+
+                pygame.draw.polygon(s, (*color, arrows_alpha), [base_point_2, base_point_1, arrow_base_1_point_1, arrow_base_2_point_1, destination_cell_center, arrow_base_2_point_2, arrow_base_1_point_2])
+
+        if not player_is_white:
+            s = pygame.transform.rotate(s, 180)
+        screen.blit(s, (self.pos_x, self.pos_y))
