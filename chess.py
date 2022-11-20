@@ -10,6 +10,20 @@ class ChessGame:
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
         self.__board.set_colors(*board_colors)
         self.reset_game()
+        
+    def set_colors(self, boards_colors):
+        self.__board.set_colors(*boards_colors)
+
+    def set_chessboard_position(self, chessboard_position):
+        self.__board.set_pos(chessboard_position)
+
+    def set_chessboard_cell_size(self, cell_size):
+        self.__board.set_cell_size(cell_size)
+
+    def get_current_turn(self):
+        return self.__is_white_turn
+
+    def reset_game(self):
         self.__view_as_white = True
         self.__is_white_turn = True
         self.__turn_switching = False
@@ -26,9 +40,6 @@ class ChessGame:
         self.__drawing = False
         self.__selected_cells = []
         self.__arrows = []
-
-        
-    def reset_game(self):
         default_game.reset_board_to_default_game(self.__board)
 
     def left_click_pressed(self, event):

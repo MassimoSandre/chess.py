@@ -44,8 +44,8 @@ class Chessboard():
         tx = pos[0] - self.pos_x
         ty  = pos[1] - self.pos_y
         
-        x = int(tx/self.cell_width)
-        y = int(ty/self.cell_height)
+        x = math.floor(tx/self.cell_width)
+        y = math.floor(ty/self.cell_height)
 
         if (x < 0 or y < 0 or x >= self.board_width or y >= self.board_height) and limit:
             return None
@@ -359,8 +359,8 @@ class Chessboard():
         for a in arrows:
             ax,ay,bx,by = a
 
-            base_length = 20
-            arrow_base_2_length = 40
+            base_length = self.cell_width/5
+            arrow_base_2_length = self.cell_width/2
             starting_cell_center = (self.cell_width*(ax+0.5), (self.cell_height*self.board_height)-(self.cell_height*(ay+0.5)))
             destination_cell_center = (self.cell_width*(bx+0.5), (self.cell_height*self.board_height)-(self.cell_height*(by+0.5)))
             base_center_distance_from_cell_center = self.cell_width/3

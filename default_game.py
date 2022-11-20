@@ -9,7 +9,14 @@ from pieces.queen import Queen
 WHITE = True
 BLACK = False
 
+grid_size = (8,8)
+
 def reset_board_to_default_game(board):
+    # Cleans the board
+    for i in range(8):
+        for j in range(8):
+            board.add_piece((i,j), 0)
+
     # Pawns
     for i in range(8):
         board.add_piece((i,1), Pawn(WHITE))
