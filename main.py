@@ -6,14 +6,12 @@ import default_game as default
 # TODO
 # HIGH PRIORITY
 # - Menù
-# - FEN implementation
-# - Algebric notation
+# - Algebraic notation
 # - sounds
 # - AI (stockfish 15)
 # - sort of evaluation
 # - timer and time control
 # - collapse the online chess.py repository in here
-# - arrows
 #
 # LOW PRIORITY
 # - themes
@@ -36,9 +34,13 @@ def main():
     game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding)
 
     running = True
+    game_ended = False
     mainfont = pygame.font.SysFont('Arial', 50)
-
+    
     while running:
+        if game_ended:
+            game_ended = False
+            game.reset_game()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -60,7 +62,7 @@ def main():
                 
 
         # --- UPDATE ---
-        game.update()
+        game_ended = not game.update()
         size = width,height = pygame.display.get_surface().get_size()
         game.set_chessboard_position((width//2, height//2))
         
@@ -89,7 +91,7 @@ def main():
         screen.blit(texts, (text_x,text_y))
 
         pygame.display.update()
-        clock.tick(120)
+        clock.tick(60)
 
 
     pygame.quit()

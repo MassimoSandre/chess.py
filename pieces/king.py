@@ -11,8 +11,6 @@ class King(Piece):
 
         self.is_king = True
 
-        self.can_castle = True
-
         self.check = False
         
 

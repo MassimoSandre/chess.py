@@ -9,7 +9,6 @@ class Rook(Piece):
             self.sprite = pygame.image.load('images/blackrook.png').convert_alpha()
         Piece.__init__(self=self,is_white=is_white)
 
-        self.can_castle = True
 
     def move(self):
         self.can_castle = False

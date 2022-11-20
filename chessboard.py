@@ -256,10 +256,10 @@ class Chessboard():
             screen.blit(txt, (x,y))
             
 
-    def render_highlighted_cells(self, screen, player_is_white, cells, color):
+    def render_highlighted_cells(self, screen, player_is_white, cells, color, highlighting_alpha=130):
         for c in cells:
             s = pygame.Surface((self.cell_width, self.cell_height))
-            s.set_alpha(180)
+            s.set_alpha(highlighting_alpha)
             s.fill(color)
             if player_is_white:
                 x = self.pos_x + c[0]*self.cell_width
@@ -352,7 +352,7 @@ class Chessboard():
                         self.pieces[i][j].render(screen, (self.pos_x + (self.board_width-i-1)*self.cell_width + int(self.cell_width/2), self.pos_y + j*self.cell_height + int(self.cell_height/2)))
 
 
-    def render_arrows(self, screen, player_is_white, arrows, color, arrows_alpha=100):
+    def render_arrows(self, screen, player_is_white, arrows, color, arrows_alpha=140):
         s = pygame.Surface((self.cell_width*self.board_width, self.cell_width*self.board_height), pygame.SRCALPHA)
         s.fill((255,255,255,0))
 

@@ -1,5 +1,7 @@
 from chessboard import Chessboard
 import default_game
+from pieces.king import King
+from pieces.pawn import Pawn
 from pieces.queen import Queen
 from pieces.rook import Rook
 from pieces.knight import Knight
@@ -10,7 +12,7 @@ class ChessGame:
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
         self.__board.set_colors(*board_colors)
         self.reset_game()
-        
+
     def set_colors(self, boards_colors):
         self.__board.set_colors(*boards_colors)
 
@@ -23,7 +25,7 @@ class ChessGame:
     def get_current_turn(self):
         return self.__is_white_turn
 
-    def reset_game(self):
+    def __variables_reset(self):
         self.__view_as_white = True
         self.__is_white_turn = True
         self.__turn_switching = False
@@ -40,7 +42,61 @@ class ChessGame:
         self.__drawing = False
         self.__selected_cells = []
         self.__arrows = []
-        default_game.reset_board_to_default_game(self.__board)
+
+    def reset_game(self):
+        self.__variables_reset()
+        self.load_position_from_fen_string(default_game.default_game_string)
+
+    def load_position_from_fen_string(self, fen_string):
+        fields = fen_string.split(' ')
+        ranks = fields[0].split('/')
+        ranks.reverse()
+        for a in enumerate(ranks):
+            row, rank = a
+            col = 0
+            for c in rank:
+                if c.isdigit():
+                    for k in range(col,col+int(c)):
+                        self.__board.pieces[k][row] = 0
+                    col += int(c)
+
+                else:
+                    d = {'k':King, 'n':Knight, 'q':Queen, 'b':Bishop, 'r':Rook, 'p':Pawn}
+                    self.__board.pieces[col][row] = d[c.lower()](c.isupper())
+                    col += 1
+        
+        
+        self.__is_white_turn = fields[1] == 'w'
+        self.__view_as_white = self.__is_white_turn
+
+        for castling in fields[2]:
+            match castling:
+                case 'K':
+                    self.__board.pieces[4][0].can_castle = True
+                    self.__board.pieces[7][0].can_castle = True
+                case 'k':
+                    self.__board.pieces[4][7].can_castle = True
+                    self.__board.pieces[7][7].can_castle = True
+                case 'Q':
+                    self.__board.pieces[0][0].can_castle = True
+                    self.__board.pieces[4][0].can_castle = True
+                case 'q':
+                    self.__board.pieces[4][7].can_castle = True
+                    self.__board.pieces[0][7].can_castle = True
+
+        if fields[3] != '-':
+            row = int(fields[3][1])
+            col = ord(fields[3][0])-97
+            if row == 3:
+                row = 2
+            if row == 6:
+                row = 7
+            self.__board.pieces[col][row].can_be_captured_en_passant = True
+
+        # i currently don't count halfmoves since the last capture or pawn advance
+
+        # i currently don't count moves
+
 
     def left_click_pressed(self, event):
         self.__arrows = []
@@ -152,7 +208,7 @@ class ChessGame:
         else:
             self.__board.render_pieces(screen, self.__view_as_white)
 
-        self.__board.render_arrows(screen, self.__view_as_white, self.__arrows, (255,127,80))
+        self.__board.render_arrows(screen, self.__view_as_white, self.__arrows, (255,150,60))
 
         if self.__promoting:
             self.__board.render_promoting_ui(screen, self.__is_white_turn,self.__view_as_white, self.__promoting_cell)
