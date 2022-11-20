@@ -38,14 +38,14 @@ class Chessboard():
         return self.pieces[x][y]
 
     # returns a tuple which represents the coordinates of the cell the position falls
-    def get_cell_by_position(self, pos, player_is_white):
+    def get_cell_by_position(self, pos, player_is_white, limit=True):
         tx = pos[0] - self.pos_x
         ty  = pos[1] - self.pos_y
         
         x = int(tx/self.cell_width)
         y = int(ty/self.cell_height)
 
-        if x < 0 or y < 0 or x >= self.board_width or y >= self.board_height:
+        if (x < 0 or y < 0 or x >= self.board_width or y >= self.board_height) and limit:
             return None
 
         if player_is_white:

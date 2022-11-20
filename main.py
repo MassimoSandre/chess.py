@@ -7,6 +7,23 @@ from pieces.knight import Knight
 from pieces.queen import Queen
 import default_game as default
 
+# TODO
+# HIGH PRIORITY
+# - Menù
+# - FEN implementation
+# - Algebric notation
+# - sounds
+# - AI (stockfish 15)
+# - sort of evaluation
+# - timer and time control
+# - collapse the online chess.py repository in here
+# - arrows
+#
+# LOW PRIORITY
+# - themes
+
+# NOTE
+# Remember ReiettoAyanami to do this in Rust
 
 size = width, height = 800, 800
 
@@ -36,6 +53,8 @@ black_check = False
 is_white_turn = True
 turn_switching = False
 
+starting_cell = (0,0)
+
 promoting = False
 promoting_cell = 0
 
@@ -45,6 +64,10 @@ starting = 0
 moved_piece = (0,0)
 
 last_move = []
+
+drawing = False
+selected_cells = []
+arrows = []
 
 mainfont = pygame.font.SysFont('Arial', 50)
 
@@ -56,7 +79,7 @@ while running:
             if event.button == 1: 
                 if promoting:
                     # check which new piece the user has selected
-                    clicked_cell = board.get_cell_by_position(event.pos, False)
+                    clicked_cell = board.get_cell_by_position(event.pos, False, False)
 
                     if is_white_turn:
                         cell_to_update = (7-promoting_cell,7)
@@ -73,13 +96,13 @@ while running:
                     if x == (0,0):
                         board.add_piece(cell_to_update, Queen(board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
                         pass
-                    elif x == (1,0):
+                    elif x == (-1,0):
                         board.add_piece(cell_to_update, Rook(board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
                         pass
                     elif x == (0,1):
                         board.add_piece(cell_to_update, Bishop(board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
                         pass
-                    elif x == (1,1):
+                    elif x == (-1,1):
                         board.add_piece(cell_to_update, Knight(board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
                         pass
                     else:
@@ -96,17 +119,41 @@ while running:
                                 starting_cell = clicked_cell
             elif event.button == 2:
                 view_as_white = not view_as_white
+            
+            elif event.button == 3:
+                clicked_cell = board.get_cell_by_position(event.pos, view_as_white)
+                if clicked_cell != None:
+                    drawing = True
+                    starting_cell = clicked_cell
+
         
         if event.type == pygame.MOUSEBUTTONUP:
-            if(dragging):
-                
-                dragging = False
-                release_cell = board.get_cell_by_position(event.pos, view_as_white)
-                if release_cell in board.get_piece_possible_moves(starting_cell):
-                    board.move_piece(starting_cell, release_cell, definitive=True, castling_check=True, en_passant=True)
-                    turn_switching = True
-                    moved_piece = release_cell
-                    last_move = [starting_cell, release_cell]
+            if event.button == 1:
+                if(dragging):
+                    
+                    dragging = False
+                    release_cell = board.get_cell_by_position(event.pos, view_as_white)
+                    if release_cell in board.get_piece_possible_moves(starting_cell):
+                        board.move_piece(starting_cell, release_cell, definitive=True, castling_check=True, en_passant=True)
+                        turn_switching = True
+                        moved_piece = release_cell
+                        last_move = [starting_cell, release_cell]
+
+            elif event.button == 3:
+                if (drawing):
+                    drawing = False
+                    clicked_cell = board.get_cell_by_position(event.pos, view_as_white)
+                    if clicked_cell != None:
+                        if clicked_cell != starting_cell:
+                            if (starting_cell[0], starting_cell[1], clicked_cell[0], clicked_cell[1]) in arrows:
+                                arrows.remove((starting_cell[0], starting_cell[1], clicked_cell[0], clicked_cell[1]))
+                            else:
+                                arrows.append((starting_cell[0], starting_cell[1], clicked_cell[0], clicked_cell[1]))
+                        else:
+                            if clicked_cell in selected_cells:
+                                selected_cells.remove(clicked_cell)
+                            else:
+                                selected_cells.append(clicked_cell)
             
 
     # --- UPDATE ---
@@ -123,6 +170,8 @@ while running:
         is_white_turn = not is_white_turn
         view_as_white = is_white_turn
         turn_switching = False
+        arrows = []
+        selected_cells = []
 
     size = width,height = pygame.display.get_surface().get_size()
 
@@ -143,8 +192,9 @@ while running:
     screen.fill(colors['black'])
     board.render(screen, view_as_white)
 
-    board.render_highlighted_cells(screen, view_as_white, last_move,(40,255,40))
-
+    board.render_highlighted_cells(screen, view_as_white, last_move, (40, 255, 40))
+    board.render_highlighted_cells(screen, view_as_white, selected_cells, (200, 30, 40))
+    
     if dragging:
         pr = board.get_piece_possible_moves(starting_cell)
 
