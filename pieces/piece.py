@@ -1,13 +1,16 @@
 import pygame
 
 class Piece():
-    def __init__(self, is_white):
+    def __init__(self, is_white, sprite):
+        self.sprite = sprite
         self.is_white = is_white
         self.is_promotable = False
         self.is_king = False
         self.can_castle = False
         self.original_sprite_size = (self.sprite.get_rect().width, self.sprite.get_rect().height)
         self.can_be_captured_en_passant = False
+        self.material_value = 0
+        
         
 
     def move(self):

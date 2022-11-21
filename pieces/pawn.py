@@ -2,13 +2,10 @@ import pygame
 from pieces.piece import Piece
 
 class Pawn(Piece):
-    def __init__(self, is_white):
-        if is_white:
-            self.sprite = pygame.image.load('images/whitepawn.png').convert_alpha()
-        else:
-            self.sprite = pygame.image.load('images/blackpawn.png').convert_alpha()
-        Piece.__init__(self=self,is_white=is_white)
+    def __init__(self, is_white, sprite):
+        Piece.__init__(self=self,is_white=is_white,sprite=sprite)
         self.is_promotable = True
+        self.material_value = 1
         
 
     def get_possible_moves(self, chessboard, pos):

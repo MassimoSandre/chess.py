@@ -11,7 +11,6 @@ class Chessboard():
         
         self.set_cell_size(cell_size)
         self.set_pos(pos)
-        
 
         # create the actual matrix:
         self.pieces = []

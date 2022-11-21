@@ -1,3 +1,4 @@
+import pygame
 from chessboard import Chessboard
 import default_game
 from pieces.king import King
@@ -12,9 +13,26 @@ class ChessGame:
     def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10, timer_time_in_seconds=300, timer_increment=0, timer_box_size=(150,50), timer_symbol_radius=20, timer_padding=10, timer_box_color=(100,100,100), timer_border_radius=4) -> None:
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
         self.__board.set_colors(*board_colors)
+        self.__load_sprites()
         self.__margin = margin
         self.__timer_settings = [timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius]
         self.reset_game()
+
+    def __load_sprites(self):
+        self.__sprites = {}
+        self.__sprites['k'] = pygame.image.load('images/blackking.png').convert_alpha()
+        self.__sprites['q'] = pygame.image.load('images/blackqueen.png').convert_alpha()
+        self.__sprites['r'] = pygame.image.load('images/blackrook.png').convert_alpha()
+        self.__sprites['b'] = pygame.image.load('images/blackbishop.png').convert_alpha()
+        self.__sprites['n'] = pygame.image.load('images/blackknight.png').convert_alpha()
+        self.__sprites['p'] = pygame.image.load('images/blackpawn.png').convert_alpha()
+        self.__sprites['K'] = pygame.image.load('images/whiteking.png').convert_alpha()
+        self.__sprites['Q'] = pygame.image.load('images/whitequeen.png').convert_alpha()
+        self.__sprites['R'] = pygame.image.load('images/whiterook.png').convert_alpha()
+        self.__sprites['B'] = pygame.image.load('images/whitebishop.png').convert_alpha()
+        self.__sprites['N'] = pygame.image.load('images/whiteknight.png').convert_alpha()
+        self.__sprites['P'] = pygame.image.load('images/whitepawn.png').convert_alpha()
+
 
     def set_colors(self, boards_colors):
         self.__board.set_colors(*boards_colors)
@@ -74,7 +92,7 @@ class ChessGame:
 
                 else:
                     d = {'k':King, 'n':Knight, 'q':Queen, 'b':Bishop, 'r':Rook, 'p':Pawn}
-                    self.__board.pieces[col][row] = d[c.lower()](c.isupper())
+                    self.__board.pieces[col][row] = d[c.lower()](c.isupper(), self.__sprites[c])
                     col += 1
         
         
@@ -130,13 +148,13 @@ class ChessGame:
 
             self.__promoting = False
             if x == (0,0):
-                self.__board.add_piece(cell_to_update, Queen(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
+                self.__board.add_piece(cell_to_update, Queen(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['Q'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['q']))
             elif x == (-1,0):
-                self.__board.add_piece(cell_to_update, Rook(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
+                self.__board.add_piece(cell_to_update, Rook(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['R'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['r']))
             elif x == (0,1):
-                self.__board.add_piece(cell_to_update, Bishop(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
+                self.__board.add_piece(cell_to_update, Bishop(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['B'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['b']))
             elif x == (-1,1):
-                self.__board.add_piece(cell_to_update, Knight(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
+                self.__board.add_piece(cell_to_update, Knight(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['N'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['n']))
             else:
                 self.__promoting = True
         elif self.__clicked_piece != None:

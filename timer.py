@@ -19,6 +19,9 @@ class Timer:
             return False
         return True
 
+    def set_time(self, time):
+        self.__time = time
+
     def make_move(self):
         self.__time += self.__increment
 
@@ -60,15 +63,18 @@ class Timer:
         screen.blit(s, (position[0] + self.__padding , position[1] + self.__padding//2))
 
         minutes = str(int(self.__time//60))
-        seconds = str(int(self.__time%60))
+        seconds = self.__time%60
 
         time_string = ''
         if minutes == '0':
-            time_string = seconds
+            if seconds < 20:
+                time_string = str(int(seconds*10)/10)
+            else:
+                time_string = str(int(seconds))
         elif len(seconds) != 2:
-            time_string = minutes + ':0' + seconds
+            time_string = minutes + ':0' + str(int(seconds))
         else:
-            time_string = minutes + ':' + seconds
+            time_string = minutes + ':' + str(int(seconds))
         
         texts = font.render(time_string, True, (255,255,255))
 
