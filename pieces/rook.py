@@ -6,6 +6,11 @@ class Rook(Piece):
         Piece.__init__(self=self,is_white=is_white,sprite=sprite)
         self.material_value = 5
 
+    def get_code(self):
+        l = 'R'
+        if not self.is_white:
+            l = l.lower()
+        return l
 
     def move(self):
         self.can_castle = False

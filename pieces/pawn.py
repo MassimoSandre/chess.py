@@ -7,6 +7,11 @@ class Pawn(Piece):
         self.is_promotable = True
         self.material_value = 1
         
+    def get_code(self):
+        l = 'P'
+        if not self.is_white:
+            l = l.lower()
+        return l
 
     def get_possible_moves(self, chessboard, pos):
         possible_moves = []

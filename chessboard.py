@@ -8,6 +8,8 @@ class Chessboard():
     def __init__(self, pos, board_size , cell_size, board_padding=10):
         self.board_padding = board_padding
         self.board_width, self.board_height = board_size
+
+        self.__capture = None
         
         self.set_cell_size(cell_size)
         self.set_pos(pos)
@@ -19,6 +21,11 @@ class Chessboard():
             for _ in range(self.board_height):
                 temp.append(0)
             self.pieces.append(temp)
+
+    def get_capture(self):
+        capture = self.__capture
+        self.__capture = None
+        return capture
 
     def get_rect(self):
         return pygame.Rect(self.pos_x-self.board_padding, self.pos_y-self.board_padding, self.board_width*self.cell_width+2*self.board_padding, self.board_height*self.cell_height+2*self.board_padding)
@@ -57,10 +64,18 @@ class Chessboard():
         else:
             return (self.board_width-x-1, y)
 
-    def remove_piece(self, pos):
+    def remove_piece(self, pos, record_capture=False):
+        if record_capture:
+            p = self.get_piece(pos)
+            if p != None:
+                self.__capture = p.get_code()
         self.add_piece(pos, 0)
 
-    def add_piece(self, pos, piece):
+    def add_piece(self, pos, piece, record_capture=False):
+        if record_capture:
+            p = self.get_piece(pos)
+            if p != None:
+                self.__capture = p.get_code()
         self.pieces[pos[0]][pos[1]] = piece
 
     def move_piece(self, starting_pos, destination_pos, definitive=False, castling_check=False, en_passant=False):
@@ -75,10 +90,10 @@ class Chessboard():
 
         if en_passant:
             if self.pieces[starting_pos[0]][starting_pos[1]].is_promotable and starting_pos[0] != destination_pos[0] and self.pieces[destination_pos[0]][destination_pos[1]] == 0:
-                self.remove_piece((destination_pos[0], starting_pos[1]))
+                self.remove_piece((destination_pos[0], starting_pos[1]), definitive)
 
 
-        self.add_piece(destination_pos, self.pieces[starting_pos[0]][starting_pos[1]])
+        self.add_piece(destination_pos, self.pieces[starting_pos[0]][starting_pos[1]], definitive)
         self.remove_piece(starting_pos)
         if definitive:
             self.get_piece(destination_pos).move()

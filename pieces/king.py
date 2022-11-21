@@ -9,6 +9,11 @@ class King(Piece):
 
         self.check = False
         
+    def get_code(self):
+        l = 'K'
+        if not self.is_white:
+            l = l.lower()
+        return l
 
     def move(self):
         self.can_castle = False

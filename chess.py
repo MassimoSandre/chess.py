@@ -8,15 +8,29 @@ from pieces.rook import Rook
 from pieces.knight import Knight
 from pieces.bishop import Bishop
 from timer import Timer
+from material_displayer import MaterialDisplayer
 
 class ChessGame:
-    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10, timer_time_in_seconds=300, timer_increment=0, timer_box_size=(150,50), timer_symbol_radius=20, timer_padding=10, timer_box_color=(100,100,100), timer_border_radius=4) -> None:
+    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10) -> None:
+        self.__margin = margin
+
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
+
         self.__board.set_colors(*board_colors)
         self.__load_sprites()
-        self.__margin = margin
-        self.__timer_settings = [timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius]
+        self.set_timer_settings()
+        self.set_material_displayer_settings()
+        
         self.reset_game()
+
+    def set_timer_settings(self,*,timer_time_in_seconds=300, timer_increment=0, timer_box_size=(150,50), timer_symbol_radius=20, timer_padding=10, timer_box_color=(100,100,100), timer_border_radius=4):
+        self.__white_timer = Timer(timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius)
+        self.__black_timer = Timer(timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius)
+
+    def set_material_displayer_settings(self, displayer_box_size=(150,50), displayer_sprites_size=20,displayer_padding=10, displayer_box_color=(100,100,100), displayer_border_radius=4, spacings=(-15,0)):
+        self.__white_material_displayer = MaterialDisplayer(displayer_box_size, displayer_sprites_size, displayer_padding, displayer_box_color, displayer_border_radius, spacings)
+        self.__black_material_displayer = MaterialDisplayer(displayer_box_size, displayer_sprites_size, displayer_padding, displayer_box_color, displayer_border_radius, spacings)
+
 
     def __load_sprites(self):
         self.__sprites = {}
@@ -68,8 +82,7 @@ class ChessGame:
         self.__selected_cells = []
         self.__arrows = []
 
-        self.__white_timer = Timer(*self.__timer_settings)
-        self.__black_timer = Timer(*self.__timer_settings)
+        self.__white_material_advantage = 0
 
         self.winner = None
 
@@ -157,22 +170,20 @@ class ChessGame:
                 self.__board.add_piece(cell_to_update, Knight(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['N'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['n']))
             else:
                 self.__promoting = True
-        elif self.__clicked_piece != None:
-            clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
-            
-            if clicked_cell != None:
-                if clicked_cell in self.__board.get_piece_possible_moves(self.__clicked_piece):
-                    self.__make_move(self.__clicked_piece, clicked_cell)
-
         else:
             clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
+            if self.__clicked_piece != None and clicked_cell != None and clicked_cell in self.__board.get_piece_possible_moves(self.__clicked_piece):
+                self.__make_move(self.__clicked_piece, clicked_cell)
+            else: 
 
-            if clicked_cell != None:
-                x = self.__board.get_piece(clicked_cell)
-                if x != None:
-                    if not(x.is_white ^ self.__is_white_turn):
-                        self.__dragging = True
-                        self.__starting_cell = clicked_cell
+                clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
+
+                if clicked_cell != None:
+                    x = self.__board.get_piece(clicked_cell)
+                    if x != None:
+                        if not(x.is_white ^ self.__is_white_turn):
+                            self.__dragging = True
+                            self.__starting_cell = clicked_cell
 
         self.__clicked_piece = None
 
@@ -242,6 +253,15 @@ class ChessGame:
             self.__view_as_white = self.__is_white_turn
             self.__turn_switching = False
 
+        self.__white_material_advantage = self.__white_material_displayer.get_total_material_value()-self.__black_material_displayer.get_total_material_value()
+
+        capture = self.__board.get_capture()
+        if capture != None:
+            if capture.islower():
+                self.__white_material_displayer.add_material(capture)
+            else:
+                self.__black_material_displayer.add_material(capture)
+                
         timeout = False
 
         if self.__game_started:        
@@ -256,7 +276,7 @@ class ChessGame:
 
         return game
 
-    def render(self, screen, mouse_position, timer_font):
+    def render(self, screen, mouse_position, timer_font, displayer_font):
         self.__board.render(screen, self.__view_as_white)
 
         self.__board.render_highlighted_cells(screen, self.__view_as_white, self.__last_move, (40, 255, 40))
@@ -291,9 +311,22 @@ class ChessGame:
         bottom_timer_pos[0]-=self.__white_timer.get_width()
         bottom_timer_pos[1]+=self.__margin
 
+        top_material_displayer_pos = list(self.__board.get_rect().topleft)
+        top_material_displayer_pos[1]-=self.__white_material_displayer.get_height()+self.__margin
+
+        bottom_material_displayer_pos = list(self.__board.get_rect().bottomleft)
+        bottom_material_displayer_pos[1]+=self.__margin
+
+
         if self.__view_as_white:
             self.__white_timer.render(screen, bottom_timer_pos, timer_font)
             self.__black_timer.render(screen, top_timer_pos, timer_font)
+
+            self.__white_material_displayer.render(screen, bottom_material_displayer_pos, displayer_font, self.__sprites, self.__white_material_advantage)
+            self.__black_material_displayer.render(screen, top_material_displayer_pos, displayer_font, self.__sprites, -self.__white_material_advantage)
         else:
             self.__white_timer.render(screen, top_timer_pos, timer_font)
             self.__black_timer.render(screen, bottom_timer_pos, timer_font)
+
+            self.__white_material_displayer.render(screen, top_material_displayer_pos, displayer_font, self.__sprites, self.__white_material_advantage)
+            self.__black_material_displayer.render(screen, bottom_material_displayer_pos, displayer_font, self.__sprites, -self.__white_material_advantage)

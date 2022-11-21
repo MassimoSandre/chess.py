@@ -71,7 +71,7 @@ class Timer:
                 time_string = str(int(seconds*10)/10)
             else:
                 time_string = str(int(seconds))
-        elif len(seconds) != 2:
+        elif seconds < 10:
             time_string = minutes + ':0' + str(int(seconds))
         else:
             time_string = minutes + ':' + str(int(seconds))

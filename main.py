@@ -3,6 +3,7 @@ from pygame.locals import *
 from chess import ChessGame
 import default_game as default
 
+
 # TODO
 # HIGH PRIORITY
 # - Menù
@@ -35,11 +36,13 @@ def main():
     pygame.font.init()
     clock = pygame.time.Clock()
 
-    game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding, timer_time_in_seconds=time_on_clock, timer_increment=timer_increment)
+    game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding)
+    game.set_timer_settings(timer_time_in_seconds=time_on_clock, timer_increment=timer_increment)
 
     running = True
     game_ended = False
     mainfont = pygame.font.SysFont('Arial', 35)
+    displayer_font = pygame.font.SysFont('Arial', 18)
     ready = False
     last_update = 0 
     time_lapsed = 0
@@ -91,7 +94,7 @@ def main():
 
         # --- RENDER ---
         screen.fill(colors['black'])
-        game.render(screen,pygame.mouse.get_pos(), mainfont)
+        game.render(screen,pygame.mouse.get_pos(), mainfont, displayer_font)
 
         if game.get_current_turn():
             texts = mainfont.render("It's White's turn", True, (255,255,255))

@@ -10,8 +10,9 @@ class Piece():
         self.original_sprite_size = (self.sprite.get_rect().width, self.sprite.get_rect().height)
         self.can_be_captured_en_passant = False
         self.material_value = 0
-        
-        
+    
+    def get_code(self):
+        return None    
 
     def move(self):
         pass

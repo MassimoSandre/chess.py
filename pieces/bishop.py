@@ -6,6 +6,12 @@ class Bishop(Piece):
         Piece.__init__(self=self,is_white=is_white,sprite=sprite)
         self.material_value = 3
 
+    def get_code(self):
+        l = 'B'
+        if not self.is_white:
+            l = l.lower()
+        return l
+
     def get_possible_moves(self, chessboard, pos):
         possible_moves = []
 
