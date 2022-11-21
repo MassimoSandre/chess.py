@@ -84,6 +84,10 @@ class ChessGame:
 
         self.__white_material_advantage = 0
 
+        self.__moves = []
+        self.__current_move = 1
+        self.__semimoves = 0
+
         self.result = None
 
     def reset_game(self):
@@ -140,9 +144,13 @@ class ChessGame:
                 row = 7
             self.__board.pieces[col][row].can_be_captured_en_passant = True
 
-        # i currently don't count halfmoves since the last capture or pawn advance
+        self.__semimoves = int(fields[4])
+        
+        self.__current_move = int(fields[5])
+        self.__moves.append(fields[5] + '.')
 
-        # i currently don't count moves
+        if self.__semimoves%2 == 1:
+            self.__moves[0] += '..'
 
 
     def left_click_pressed(self, event):
@@ -230,9 +238,18 @@ class ChessGame:
                         self.__selected_cells.append(clicked_cell)
 
     def __make_move(self, starting_cell, destination_cell):
+        move = self.__board.get_move_code(starting_cell, destination_cell)
         self.__board.move_piece(starting_cell, destination_cell, definitive=True, castling_check=True, en_passant=True)
         self.__turn_switching = True
         self.__last_move = [self.__starting_cell, destination_cell]
+        if self.__is_white_turn:
+            self.__moves.append(str(self.__current_move) + '. ' + move + ' ')
+        else:
+            self.__moves[-1] += move
+            self.__current_move+=1
+            print(self.__moves[-1])
+            
+
 
     def update(self, time_lapsed):
         game = True

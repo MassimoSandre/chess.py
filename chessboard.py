@@ -78,6 +78,36 @@ class Chessboard():
                 self.__capture = p.get_code()
         self.pieces[pos[0]][pos[1]] = piece
 
+    def get_cell_name(self, cell):
+        x,y = cell
+        return chr(x+97) + str(y+1)
+
+    def get_move_code(self,starting_cell, destination_cell):
+        code = self.get_piece(starting_cell).get_code().upper()
+        
+        if code == 'K' and abs(starting_cell[0]-destination_cell[0]) == 2:
+            if destination_cell[0] == 2:
+                code = 'O-O-O'
+            else:
+                code = 'O-O'
+
+        else:
+            code += self.get_cell_name(starting_cell)
+
+            if self.get_piece(destination_cell) != None:
+                code += 'x'
+            else:
+                if code[0] == 'P' and starting_cell[0] != destination_cell[0]:
+                    code += 'x'
+
+            code += self.get_cell_name(destination_cell)
+
+            if code[0] == 'P':
+                code = code[1:]
+        
+        return code
+
+
     def move_piece(self, starting_pos, destination_pos, definitive=False, castling_check=False, en_passant=False):
         if castling_check:
             if self.pieces[starting_pos[0]][starting_pos[1]].is_king and abs(starting_pos[0]-destination_pos[0]) == 2:

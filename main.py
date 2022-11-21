@@ -6,8 +6,8 @@ import default_game as default
 
 # TODO
 # HIGH PRIORITY
-# - Menù
-# - Algebraic notation
+# - menù
+# - improve algebraic notation 
 # - sounds
 # - AI (stockfish 15)
 # - sort of evaluation
