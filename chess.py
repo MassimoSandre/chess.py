@@ -9,10 +9,11 @@ from pieces.bishop import Bishop
 from timer import Timer
 
 class ChessGame:
-    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10) -> None:
+    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10, timer_time_in_seconds=300, timer_increment=0, timer_box_size=(150,50), timer_symbol_radius=20, timer_padding=10, timer_box_color=(100,100,100), timer_border_radius=4) -> None:
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
         self.__board.set_colors(*board_colors)
         self.__margin = margin
+        self.__timer_settings = [timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius]
         self.reset_game()
 
     def set_colors(self, boards_colors):
@@ -32,10 +33,14 @@ class ChessGame:
         self.__is_white_turn = True
         self.__turn_switching = False
 
+        self.__game_started = False
+
         self.__starting_cell = (0,0)
 
         self.__promoting = False
         self.__promoting_cell = 0
+
+        self.__clicked_piece = None
 
         self.__dragging = False
 
@@ -45,8 +50,10 @@ class ChessGame:
         self.__selected_cells = []
         self.__arrows = []
 
-        self.__white_timer = Timer()
-        self.__black_timer = Timer()
+        self.__white_timer = Timer(*self.__timer_settings)
+        self.__black_timer = Timer(*self.__timer_settings)
+
+        self.winner = None
 
     def reset_game(self):
         self.__variables_reset()
@@ -124,18 +131,21 @@ class ChessGame:
             self.__promoting = False
             if x == (0,0):
                 self.__board.add_piece(cell_to_update, Queen(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
-                pass
             elif x == (-1,0):
                 self.__board.add_piece(cell_to_update, Rook(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
-                pass
             elif x == (0,1):
                 self.__board.add_piece(cell_to_update, Bishop(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
-                pass
             elif x == (-1,1):
                 self.__board.add_piece(cell_to_update, Knight(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white))
-                pass
             else:
                 self.__promoting = True
+        elif self.__clicked_piece != None:
+            clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
+            
+            if clicked_cell != None:
+                if clicked_cell in self.__board.get_piece_possible_moves(self.__clicked_piece):
+                    self.__make_move(self.__clicked_piece, clicked_cell)
+
         else:
             clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
 
@@ -145,8 +155,12 @@ class ChessGame:
                     if not(x.is_white ^ self.__is_white_turn):
                         self.__dragging = True
                         self.__starting_cell = clicked_cell
+
+        self.__clicked_piece = None
+
     
     def right_click_pressed(self, event):
+        self.__clicked_piece = None
         clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
         if clicked_cell != None:
             self.__drawing = True
@@ -160,9 +174,11 @@ class ChessGame:
             self.__dragging = False
             release_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
             if release_cell in self.__board.get_piece_possible_moves(self.__starting_cell):
-                self.__board.move_piece(self.__starting_cell, release_cell, definitive=True, castling_check=True, en_passant=True)
-                self.__turn_switching = True
-                self.__last_move = [self.__starting_cell, release_cell]
+                self.__make_move(self.__starting_cell, release_cell)
+                
+            elif release_cell == self.__starting_cell:
+                self.__clicked_piece = release_cell
+
 
     def right_click_released(self, event):
         if (self.__drawing):
@@ -180,8 +196,13 @@ class ChessGame:
                     else:
                         self.__selected_cells.append(clicked_cell)
 
+    def __make_move(self, starting_cell, destination_cell):
+        self.__board.move_piece(starting_cell, destination_cell, definitive=True, castling_check=True, en_passant=True)
+        self.__turn_switching = True
+        self.__last_move = [self.__starting_cell, destination_cell]
+
     def update(self, time_lapsed):
-        game_ended = True
+        game = True
         x = self.__board.check_for_promotion(self.__is_white_turn)
         
         if x != None:
@@ -189,8 +210,11 @@ class ChessGame:
             self.__promoting_cell = x
 
         if not self.__promoting and self.__turn_switching:
-            if self.__board.check_for_checkmate(not self.__view_as_white):
-                game_ended = False
+            if not self.__game_started:
+                self.__game_started = True
+            if self.__board.check_for_checkmate(not self.__is_white_turn):
+                game = False
+                self.winner = self.__is_white_turn
 
             if self.__is_white_turn:
                 self.__white_timer.make_move()
@@ -200,13 +224,19 @@ class ChessGame:
             self.__view_as_white = self.__is_white_turn
             self.__turn_switching = False
 
-        
-        if self.__is_white_turn:
-            self.__white_timer.update(time_lapsed)
-        else:
-            self.__black_timer.update(time_lapsed)
+        timeout = False
 
-        return game_ended
+        if self.__game_started:        
+            if self.__is_white_turn:
+                timeout = not self.__white_timer.update(time_lapsed)
+            else:
+                timeout = not self.__black_timer.update(time_lapsed)
+
+        if game and timeout:
+            self.winner = not self.__is_white_turn
+            game = False
+
+        return game
 
     def render(self, screen, mouse_position, timer_font):
         self.__board.render(screen, self.__view_as_white)
@@ -218,9 +248,15 @@ class ChessGame:
             pr = self.__board.get_piece_possible_moves(self.__starting_cell)
 
             self.__board.render_possible_moves_cells(screen, self.__view_as_white, pr)
-            
+
             self.__board.render_pieces(screen, self.__view_as_white,[self.__starting_cell])
             self.__board.render_dragging_piece(screen, self.__starting_cell, mouse_position)
+        elif self.__clicked_piece != None:
+            pr = self.__board.get_piece_possible_moves(self.__clicked_piece)
+
+            self.__board.render_possible_moves_cells(screen, self.__view_as_white, pr)
+
+            self.__board.render_pieces(screen, self.__view_as_white)
         else:
             self.__board.render_pieces(screen, self.__view_as_white)
 
@@ -243,6 +279,3 @@ class ChessGame:
         else:
             self.__white_timer.render(screen, top_timer_pos, timer_font)
             self.__black_timer.render(screen, bottom_timer_pos, timer_font)
-
-
-        

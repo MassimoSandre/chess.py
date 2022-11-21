@@ -11,6 +11,7 @@ import default_game as default
 # - AI (stockfish 15)
 # - sort of evaluation
 # - collapse the online chess.py repository in here
+# - captured material
 #
 # LOW PRIORITY
 # - themes
@@ -23,6 +24,9 @@ def main():
     # --- SETTINGS ---
     board_padding = 10
     grid_size = default.grid_size
+    time_on_clock = default.default_starting_time
+    timer_increment = default.default_increment
+
     size = width, height = 800, 800
 
     colors = {'white': (255,255,255), 'black': (0,0,0), 'blue': (0,0,255), 'red': (255,0,0)}
@@ -31,7 +35,7 @@ def main():
     pygame.font.init()
     clock = pygame.time.Clock()
 
-    game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding)
+    game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding, timer_time_in_seconds=time_on_clock, timer_increment=timer_increment)
 
     running = True
     game_ended = False
@@ -43,6 +47,10 @@ def main():
     while running:
         if game_ended:
             game_ended = False
+            if game.winner:
+                print("White wins")
+            else:
+                print("Black wins")
             game.reset_game()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

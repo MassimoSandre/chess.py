@@ -19,5 +19,6 @@ class Piece():
     def scale_by(self, factor):
         self.sprite = pygame.transform.scale(self.sprite,(int(self.original_sprite_size[0]*factor),int(self.original_sprite_size[1]*factor)))
 
-    def render(self, screen, pos, radius):
-        pass
+    def render(self, screen, pos):
+        sprite_rect = self.sprite.get_rect(center=pos)
+        screen.blit(self.sprite, sprite_rect)

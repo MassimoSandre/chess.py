@@ -2,7 +2,7 @@ import pygame
 import math
 
 class Timer:
-    def __init__(self,*,time_in_seconds=600, increment=0, box_size=(150,50), symbol_radius=20, padding=10, box_color=(100,100,100), border_radius=4) -> None:
+    def __init__(self,time_in_seconds, increment, box_size, symbol_radius, padding, box_color, border_radius) -> None:
         self.__initial_time = time_in_seconds
         self.__time = time_in_seconds
         self.__increment = increment
@@ -14,6 +14,10 @@ class Timer:
 
     def update(self, time_lapsed):
         self.__time -= time_lapsed
+        if self.__time < 0:
+            self.__time = 0
+            return False
+        return True
 
     def make_move(self):
         self.__time += self.__increment

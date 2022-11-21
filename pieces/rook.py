@@ -50,8 +50,3 @@ class Rook(Piece):
         
 
         return possible_moves
-
-    def render(self, screen, pos):
-        sprite_rect = self.sprite.get_rect(center=pos)
-        screen.blit(self.sprite, sprite_rect)
-
