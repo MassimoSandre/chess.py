@@ -12,6 +12,9 @@ class Timer:
         self.__box_color = box_color
         self.__border_radius = border_radius
 
+    def reset(self):
+        self.__time = self.__initial_time
+
     def update(self, time_lapsed):
         self.__time -= time_lapsed
         if self.__time < 0:

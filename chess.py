@@ -27,7 +27,7 @@ class ChessGame:
         self.__white_timer = Timer(timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius)
         self.__black_timer = Timer(timer_time_in_seconds, timer_increment, timer_box_size, timer_symbol_radius, timer_padding, timer_box_color, timer_border_radius)
 
-    def set_material_displayer_settings(self, displayer_box_size=(150,50), displayer_sprites_size=20,displayer_padding=10, displayer_box_color=(100,100,100), displayer_border_radius=4, spacings=(-15,0)):
+    def set_material_displayer_settings(self, displayer_box_size=(200,50), displayer_sprites_size=20,displayer_padding=10, displayer_box_color=(100,100,100), displayer_border_radius=4, spacings=(-15,0)):
         self.__white_material_displayer = MaterialDisplayer(displayer_box_size, displayer_sprites_size, displayer_padding, displayer_box_color, displayer_border_radius, spacings)
         self.__black_material_displayer = MaterialDisplayer(displayer_box_size, displayer_sprites_size, displayer_padding, displayer_box_color, displayer_border_radius, spacings)
 
@@ -88,6 +88,10 @@ class ChessGame:
 
     def reset_game(self):
         self.__variables_reset()
+        self.__white_timer.reset()
+        self.__black_timer.reset()
+        self.__white_material_displayer.reset()
+        self.__black_material_displayer.reset()
         self.load_position_from_fen_string(default_game.default_game_string)
 
     def load_position_from_fen_string(self, fen_string):

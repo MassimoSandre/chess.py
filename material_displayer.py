@@ -11,6 +11,9 @@ class MaterialDisplayer():
         self.__captured_material = []
         self.__values = {'q':9, 'r':5, 'b':3, 'n':3, 'p':1}
 
+    def reset(self):
+        self.__captured_material = []
+
     def __sort_material(self):
         def f(e):
             return self.__values[e.lower()]
@@ -40,7 +43,9 @@ class MaterialDisplayer():
         y = position[1] + self.__box_size[1]//2 - self.__sprites_size//2
 
         for i in range(len(self.__captured_material)):
-            sprite = pygame.transform.scale(sprites[self.__captured_material[i]],(self.__sprites_size,self.__sprites_size))    
+            sprite = pygame.transform.scale(sprites[self.__captured_material[i]],(self.__sprites_size,self.__sprites_size))
+            mask = pygame.mask.from_surface(sprite) 
+            
             if i != 0:
                 if self.__captured_material[i] != self.__captured_material[i-1]:
                     x+=self.__spacings[1]
@@ -48,7 +53,12 @@ class MaterialDisplayer():
                     x+=self.__spacings[0]
 
             screen.blit(sprite, (x,y))
+            outline = [(p[0] + x, p[1] + y) for p in mask.outline()]
             x+=self.__sprites_size
+            if self.__captured_material[i].isupper():
+                pygame.draw.lines(screen, (0,0,0), False, outline, 1)
+            else:
+                pygame.draw.lines(screen, (255,255,255), False, outline, 1)
 
         if material_advantage > 0:
             texts = font.render('+'+str(material_advantage), True, (255,255,255))

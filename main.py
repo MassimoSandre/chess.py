@@ -13,6 +13,7 @@ import default_game as default
 # - sort of evaluation
 # - collapse the online chess.py repository in here
 # - captured material
+# - stalemate
 #
 # LOW PRIORITY
 # - themes
