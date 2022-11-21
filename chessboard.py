@@ -192,27 +192,27 @@ class Chessboard():
         
         return False
 
+    def has_legal_moves(self, white):
+        for i in range(self.board_width):
+            for j in range(self.board_height):
+                if (self.pieces[i][j] != 0 and self.pieces[i][j].is_white and white) or (self.pieces[i][j] != 0 and not self.pieces[i][j].is_white and not white):
+                    x = self.get_piece_possible_moves((i,j))
+
+                    if len(x) > 0:
+                        return True
+
+
     def check_for_checkmate(self, checkmate_to_white):
         if not self.check_for_check(checkmate_to_white):
             return False
 
-        if(checkmate_to_white):
-            for i in range(self.board_width):
-                for j in range(self.board_height):
-                    if self.pieces[i][j] != 0 and self.pieces[i][j].is_white:
-                        x = self.get_piece_possible_moves((i,j))
+        return not self.has_legal_moves(checkmate_to_white)
 
-                        if len(x) > 0:
-                            return False
-        else:
-            for i in range(self.board_width):
-                for j in range(self.board_height):
-                    if self.pieces[i][j] != 0 and not self.pieces[i][j].is_white:
-                        x = self.get_piece_possible_moves((i,j))
-
-                        if len(x) > 0:
-                            return False
-        return True
+    def check_for_stalemate(self, stalemate_to_white):
+        if self.check_for_check(stalemate_to_white):
+            return False
+        
+        return not self.has_legal_moves(stalemate_to_white)
 
     def render(self, screen, player_is_white):
         padding = self.board_padding

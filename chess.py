@@ -84,7 +84,7 @@ class ChessGame:
 
         self.__white_material_advantage = 0
 
-        self.winner = None
+        self.result = None
 
     def reset_game(self):
         self.__variables_reset()
@@ -247,7 +247,13 @@ class ChessGame:
                 self.__game_started = True
             if self.__board.check_for_checkmate(not self.__is_white_turn):
                 game = False
-                self.winner = self.__is_white_turn
+                if self.__is_white_turn:
+                    self.result = (1,0)
+                else:
+                    self.result = (0,1)
+            elif self.__board.check_for_stalemate(not self.__is_white_turn):
+                game = False
+                self.result = (0.5,0.5)
 
             if self.__is_white_turn:
                 self.__white_timer.make_move()

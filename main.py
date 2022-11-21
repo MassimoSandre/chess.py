@@ -13,7 +13,6 @@ import default_game as default
 # - sort of evaluation
 # - collapse the online chess.py repository in here
 # - captured material
-# - stalemate
 #
 # LOW PRIORITY
 # - themes
@@ -51,10 +50,12 @@ def main():
     while running:
         if game_ended:
             game_ended = False
-            if game.winner:
+            if game.result == (1,0):
                 print("White wins")
-            else:
+            elif game.result == (0,1):
                 print("Black wins")
+            else:
+                print("Draw")
             game.reset_game()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
