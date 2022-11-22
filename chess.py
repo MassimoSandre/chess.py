@@ -7,8 +7,8 @@ from pieces.queen import Queen
 from pieces.rook import Rook
 from pieces.knight import Knight
 from pieces.bishop import Bishop
-from timer import Timer
-from material_displayer import MaterialDisplayer
+from GUI.timer import Timer
+from GUI.material_displayer import MaterialDisplayer
 
 class ChessGame:
     def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10) -> None:

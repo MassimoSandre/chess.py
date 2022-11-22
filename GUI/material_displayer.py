@@ -1,17 +1,16 @@
 import pygame
+from GUI.GUIitem import GUIItem
 
-class MaterialDisplayer():
+class MaterialDisplayer(GUIItem):
     def __init__(self, box_size, sprites_size, padding, box_color, border_radius, spacings) -> None:
-        self.__box_size = box_size
+        GUIItem.__init__(self=self, box_size=box_size, padding=padding, box_color=box_color, border_radius=border_radius)
         self.__sprites_size = sprites_size
-        self.__padding = padding
-        self.__box_color = box_color
-        self.__border_radius = border_radius
         self.__spacings = spacings
         self.__captured_material = []
         self.__values = {'q':9, 'r':5, 'b':3, 'n':3, 'p':1}
 
     def reset(self):
+        GUIItem.reset(self=self)
         self.__captured_material = []
 
     def __sort_material(self):
@@ -30,17 +29,11 @@ class MaterialDisplayer():
             s+=self.__values[m.lower()]
         return s
 
-    def get_height(self):
-        return self.__box_size[1]
-
-    def get_width(self):
-        return self.__box_size[0]
-
     def render(self, screen, position, font, sprites, material_advantage):
-        pygame.draw.rect(screen, self.__box_color, (position, self.__box_size), 0, self.__border_radius)
+        GUIItem.render(self=self,screen=screen,position=position)
         
-        x = position[0] + self.__padding
-        y = position[1] + self.__box_size[1]//2 - self.__sprites_size//2
+        x = position[0] + self.padding
+        y = position[1] + self.box_size[1]//2 - self.__sprites_size//2
 
         for i in range(len(self.__captured_material)):
             sprite = pygame.transform.scale(sprites[self.__captured_material[i]],(self.__sprites_size,self.__sprites_size))
@@ -62,5 +55,5 @@ class MaterialDisplayer():
 
         if material_advantage > 0:
             texts = font.render('+'+str(material_advantage), True, (255,255,255))
-            y = position[1] - texts.get_rect().height//2 + self.__box_size[1]//2
+            y = position[1] - texts.get_rect().height//2 + self.box_size[1]//2
             screen.blit(texts, (x,y))

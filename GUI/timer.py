@@ -1,18 +1,17 @@
 import pygame
 import math
+from GUI.GUIitem import GUIItem
 
-class Timer:
+class Timer(GUIItem):
     def __init__(self,time_in_seconds, increment, box_size, symbol_radius, padding, box_color, border_radius) -> None:
+        GUIItem.__init__(self=self, box_size=box_size, padding=padding, box_color=box_color, border_radius=border_radius)
         self.__initial_time = time_in_seconds
         self.__time = time_in_seconds
         self.__increment = increment
-        self.__box_size = box_size
         self.__symbol_radius = symbol_radius
-        self.__padding = padding
-        self.__box_color = box_color
-        self.__border_radius = border_radius
 
     def reset(self):
+        GUIItem.reset(self=self)
         self.__time = self.__initial_time
 
     def update(self, time_lapsed):
@@ -28,17 +27,8 @@ class Timer:
     def make_move(self):
         self.__time += self.__increment
 
-    def reset(self):
-        self.__time = self.__initial_time
-    
-    def get_height(self):
-        return self.__box_size[1]
-
-    def get_width(self):
-        return self.__box_size[0]
-
     def render(self, screen, position, font):
-        pygame.draw.rect(screen, self.__box_color, (position, self.__box_size), 0, self.__border_radius)
+        GUIItem.render(self=self,screen=screen, position=position)
         s = pygame.Surface((self.__symbol_radius*2, self.__symbol_radius*2), pygame.SRCALPHA)
         s.fill((255,255,255,0))
         pygame.draw.circle(s, (255,255,255, 255), (self.__symbol_radius, self.__symbol_radius), self.__symbol_radius)
@@ -63,7 +53,7 @@ class Timer:
             
             pygame.draw.polygon(s, (0,0,0,0),points)
 
-        screen.blit(s, (position[0] + self.__padding , position[1] + self.__padding//2))
+        screen.blit(s, (position[0] + self.padding , position[1] + self.padding//2))
 
         minutes = str(int(self.__time//60))
         seconds = self.__time%60
@@ -84,8 +74,8 @@ class Timer:
         offset_x = texts.get_rect().width//2
         offset_y = texts.get_rect().height//2
 
-        text_x = position[0] + (self.__box_size[0] - (self.__padding*2 + self.__symbol_radius*2))//2 - offset_x + (self.__padding*2 + self.__symbol_radius*2)
-        text_y = position[1] + self.__box_size[1]//2 - offset_y
+        text_x = position[0] + (self.box_size[0] - (self.padding*2 + self.__symbol_radius*2))//2 - offset_x + (self.padding*2 + self.__symbol_radius*2)
+        text_y = position[1] + self.box_size[1]//2 - offset_y
 
         screen.blit(texts, (text_x,text_y))
         

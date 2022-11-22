@@ -11,7 +11,6 @@ import default_game as default
 # - AI (stockfish 15)
 # - sort of evaluation
 # - collapse the online chess.py repository in here
-# - captured material
 #
 # LOW PRIORITY
 # - themes
