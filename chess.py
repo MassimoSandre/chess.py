@@ -240,6 +240,12 @@ class ChessGame:
     def __make_move(self, starting_cell, destination_cell):
         move = self.__board.get_move_code(starting_cell, destination_cell)
         self.__board.move_piece(starting_cell, destination_cell, definitive=True, castling_check=True, en_passant=True)
+
+        if self.__board.check_for_checkmate(not self.__is_white_turn):
+            move+='#'            
+        elif self.__board.check_for_check(not self.__is_white_turn):
+            move+='+'
+
         self.__turn_switching = True
         self.__last_move = [self.__starting_cell, destination_cell]
         if self.__is_white_turn:
@@ -248,6 +254,8 @@ class ChessGame:
             self.__moves[-1] += move
             self.__current_move+=1
             print(self.__moves[-1])
+        
+        self.__semimoves+=1
             
 
 

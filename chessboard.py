@@ -83,6 +83,8 @@ class Chessboard():
         return chr(x+97) + str(y+1)
 
     def get_move_code(self,starting_cell, destination_cell):
+        if self.get_piece(starting_cell) == 0:
+            return None
         code = self.get_piece(starting_cell).get_code().upper()
         
         if code == 'K' and abs(starting_cell[0]-destination_cell[0]) == 2:
@@ -92,7 +94,20 @@ class Chessboard():
                 code = 'O-O'
 
         else:
-            code += self.get_cell_name(starting_cell)
+            disambiguating = ''
+
+            same_pieces = self.get_pieces_by_piece_code(code[0],self.get_piece(starting_cell).is_white)
+            same_pieces.remove(starting_cell)
+            for p in same_pieces:
+                pm = self.get_piece_possible_moves(p)
+                if destination_cell in pm:
+                    if p[0] == starting_cell[0]:
+                        disambiguating = self.get_cell_name(starting_cell)
+                        break
+                    else:
+                        disambiguating = self.get_cell_name(starting_cell)[0]
+
+            code += disambiguating
 
             if self.get_piece(destination_cell) != None:
                 code += 'x'
@@ -139,6 +154,14 @@ class Chessboard():
         
         return x
 
+    def get_pieces_by_piece_code(self, piece_code, white):
+        ret = []
+        for i in range(self.board_width):
+            for j in range(self.board_height):
+                if self.pieces[i][j] != 0:
+                    if (not (self.pieces[i][j].is_white ^ white)) and self.pieces[i][j].get_code().lower() == piece_code.lower():
+                        ret.append((i,j))
+        return ret
 
     def get_piece_possible_moves(self, pos):
         
