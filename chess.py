@@ -11,8 +11,18 @@ from GUI.timer import Timer
 from GUI.material_displayer import MaterialDisplayer
 
 class ChessGame:
-    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10) -> None:
+    def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10, player_1, player_2,board_flipping=True, default_view_as_player_1=True) -> None:
+        self.__pieces_classes = {'k':King, 'n':Knight, 'q':Queen, 'b':Bishop, 'r':Rook, 'p':Pawn}
+
         self.__margin = margin
+
+        self.__board_flipping = board_flipping
+        self.__default_view_as_player_1 = not default_view_as_player_1
+
+        self.__white_player = player_2
+        self.__black_player = player_1
+
+        self.__grid_size = grid_size
 
         self.__board = Chessboard(chessboard_size, grid_size, cell_size, board_padding)
 
@@ -70,7 +80,7 @@ class ChessGame:
         self.__starting_cell = (0,0)
 
         self.__promoting = False
-        self.__promoting_cell = 0
+        self.__promoting_cell = None
 
         self.__clicked_piece = None
 
@@ -89,6 +99,16 @@ class ChessGame:
         self.__semimoves = 0
 
         self.result = None
+
+        self.__white_player, self.__black_player = self.__black_player, self.__white_player
+        self.__white_player.set_color(True)
+        self.__black_player.set_color(False)
+
+        self.__default_view_as_player_1 = not self.__default_view_as_player_1
+        
+        if not self.__board_flipping:
+            self.__view_as_white = self.__default_view_as_player_1
+
 
     def reset_game(self):
         self.__variables_reset()
@@ -112,13 +132,14 @@ class ChessGame:
                     col += int(c)
 
                 else:
-                    d = {'k':King, 'n':Knight, 'q':Queen, 'b':Bishop, 'r':Rook, 'p':Pawn}
+                    d = self.__pieces_classes
                     self.__board.pieces[col][row] = d[c.lower()](c.isupper(), self.__sprites[c])
                     col += 1
         
         
         self.__is_white_turn = fields[1] == 'w'
-        self.__view_as_white = self.__is_white_turn
+        if self.__board_flipping:
+            self.__view_as_white = self.__is_white_turn
 
         for castling in fields[2]:
             match castling:
@@ -158,34 +179,55 @@ class ChessGame:
         self.__selected_cells = []
         if self.__promoting:
             # check which new piece the user has selected
-            clicked_cell = self.__board.get_cell_by_position(event.pos, False, False)
-
-            if self.__is_white_turn:
-                cell_to_update = (7-self.__promoting_cell,7)
-            else:
-                cell_to_update = (self.__promoting_cell,0)
+            clicked_cell = self.__board.get_cell_by_position(event.pos, True, False)
             
             if self.__is_white_turn ^ self.__view_as_white:
-                x = (clicked_cell[0]-(self.__grid_size[0]-self.__promoting_cell-1), clicked_cell[1]-(self.__grid_size[1]-2))
+                if self.__is_white_turn:
+                    x = (clicked_cell[0]-(self.__grid_size[0]-self.__promoting_cell-1), clicked_cell[1])
+                else:
+                    x = (clicked_cell[0] - self.__promoting_cell, clicked_cell[1])
             else:
-                x = (clicked_cell[0]-self.__promoting_cell, clicked_cell[1])
+                if self.__is_white_turn:
+                    x = (clicked_cell[0]-self.__promoting_cell, clicked_cell[1]-(self.__grid_size[1]-2))
+                else:
+                    x = (clicked_cell[0]-(self.__grid_size[0]-self.__promoting_cell-1), clicked_cell[1]-(self.__grid_size[1]-2))
             
 
-            self.__promoting = False
-            if x == (0,0):
-                self.__board.add_piece(cell_to_update, Queen(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['Q'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['q']))
-            elif x == (-1,0):
-                self.__board.add_piece(cell_to_update, Rook(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['R'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['r']))
-            elif x == (0,1):
-                self.__board.add_piece(cell_to_update, Bishop(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['B'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['b']))
-            elif x == (-1,1):
-                self.__board.add_piece(cell_to_update, Knight(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['N'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['n']))
-            else:
-                self.__promoting = True
+            #self.__promoting = False
+            if x == (0,1):
+                if self.__is_white_turn:
+                    self.__white_player.set_promoting_choice('Q')
+                else:
+                    self.__black_player.set_promoting_choice('q')
+                #self.__board.add_piece(cell_to_update, Queen(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['Q'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['q']))
+            elif x == (1,1):
+                if self.__is_white_turn:
+                    self.__white_player.set_promoting_choice('R')
+                else:
+                    self.__black_player.set_promoting_choice('r')
+                #self.__board.add_piece(cell_to_update, Rook(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['R'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['r']))
+            elif x == (0,0):
+                if self.__is_white_turn:
+                    self.__white_player.set_promoting_choice('B')
+                else:
+                    self.__black_player.set_promoting_choice('b')
+                #self.__board.add_piece(cell_to_update, Bishop(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['B'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['b']))
+            elif x == (1,0):
+                if self.__is_white_turn:
+                    self.__white_player.set_promoting_choice('N')
+                else:
+                    self.__black_player.set_promoting_choice('n')
+                #self.__board.add_piece(cell_to_update, Knight(self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white, self.__sprites['N'] if self.__board.pieces[cell_to_update[0]][cell_to_update[1]].is_white else self.__sprites['n']))
+            #else:
+            #    self.__promoting = True
         else:
             clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
             if self.__clicked_piece != None and clicked_cell != None and clicked_cell in self.__board.get_piece_possible_moves(self.__clicked_piece):
-                self.__make_move(self.__clicked_piece, clicked_cell)
+                #self.__make_move(self.__clicked_piece, clicked_cell)
+                if self.__is_white_turn:
+                    self.__white_player.set_next_move(self.__clicked_piece, clicked_cell)
+                else:
+                    self.__black_player.set_next_move(self.__clicked_piece, clicked_cell)
             else: 
 
                 clicked_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
@@ -215,7 +257,11 @@ class ChessGame:
             self.__dragging = False
             release_cell = self.__board.get_cell_by_position(event.pos, self.__view_as_white)
             if release_cell in self.__board.get_piece_possible_moves(self.__starting_cell):
-                self.__make_move(self.__starting_cell, release_cell)
+                if self.__is_white_turn:
+                    self.__white_player.set_next_move(self.__starting_cell, release_cell)
+                    #self.__make_move(self.__starting_cell, release_cell)
+                else:
+                    self.__black_player.set_next_move(self.__starting_cell, release_cell)
                 
             elif release_cell == self.__starting_cell:
                 self.__clicked_piece = release_cell
@@ -261,11 +307,25 @@ class ChessGame:
 
     def update(self, time_lapsed):
         game = True
-        x = self.__board.check_for_promotion(self.__is_white_turn)
-        
+
+        x = self.__board.check_for_promotion()
         if x != None:
             self.__promoting = True
             self.__promoting_cell = x
+
+        if self.__promoting:
+            if self.__is_white_turn:
+                r = 7
+                p = self.__white_player.get_promoting_choice()
+            else:
+                r = 0
+                p = self.__black_player.get_promoting_choice()
+
+            if p != None:
+                self.__promoting = False
+
+                self.__board.add_piece((self.__promoting_cell,r), self.__pieces_classes[p.lower()](self.__board.pieces[self.__promoting_cell][r].is_white, self.__sprites[p]), p)
+
 
         if not self.__promoting and self.__turn_switching:
             if not self.__game_started:
@@ -285,7 +345,8 @@ class ChessGame:
             else:
                 self.__black_timer.make_move()
             self.__is_white_turn = not self.__is_white_turn
-            self.__view_as_white = self.__is_white_turn
+            if self.__board_flipping:
+                self.__view_as_white = self.__is_white_turn
             self.__turn_switching = False
 
         self.__white_material_advantage = self.__white_material_displayer.get_total_material_value()-self.__black_material_displayer.get_total_material_value()
@@ -308,6 +369,15 @@ class ChessGame:
         if game and timeout:
             self.winner = not self.__is_white_turn
             game = False
+
+        if game:
+            if self.__is_white_turn:
+                m = self.__white_player.get_next_move(self.__board)
+            else:
+                m = self.__black_player.get_next_move(self.__board)
+            if m != None:
+                self.__make_move(*m)
+
 
         return game
 

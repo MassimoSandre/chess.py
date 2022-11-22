@@ -2,6 +2,8 @@ import pygame, sys
 from pygame.locals import *
 from chess import ChessGame
 import default_game as default
+from players.local_player import LocalPlayer
+from players.computer_player import ComputerPlayer
 
 
 # TODO
@@ -34,7 +36,10 @@ def main():
     pygame.font.init()
     clock = pygame.time.Clock()
 
-    game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding)
+    player_1 = LocalPlayer()
+    player_2 = ComputerPlayer()
+
+    game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding, player_1=player_1, player_2=player_2,board_flipping=False,default_view_as_player_1=True)
     game.set_timer_settings(timer_time_in_seconds=time_on_clock, timer_increment=timer_increment)
 
     running = True

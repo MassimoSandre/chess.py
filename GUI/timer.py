@@ -4,14 +4,14 @@ from GUI.GUIitem import GUIItem
 
 class Timer(GUIItem):
     def __init__(self,time_in_seconds, increment, box_size, symbol_radius, padding, box_color, border_radius) -> None:
-        GUIItem.__init__(self=self, box_size=box_size, padding=padding, box_color=box_color, border_radius=border_radius)
+        super().__init__(box_size=box_size, padding=padding, box_color=box_color, border_radius=border_radius)
         self.__initial_time = time_in_seconds
         self.__time = time_in_seconds
         self.__increment = increment
         self.__symbol_radius = symbol_radius
 
     def reset(self):
-        GUIItem.reset(self=self)
+        super().reset()
         self.__time = self.__initial_time
 
     def update(self, time_lapsed):
@@ -28,7 +28,7 @@ class Timer(GUIItem):
         self.__time += self.__increment
 
     def render(self, screen, position, font):
-        GUIItem.render(self=self,screen=screen, position=position)
+        super().render(screen=screen, position=position)
         s = pygame.Surface((self.__symbol_radius*2, self.__symbol_radius*2), pygame.SRCALPHA)
         s.fill((255,255,255,0))
         pygame.draw.circle(s, (255,255,255, 255), (self.__symbol_radius, self.__symbol_radius), self.__symbol_radius)

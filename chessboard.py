@@ -149,6 +149,17 @@ class Chessboard():
             if self.pieces[destination_pos[0]][destination_pos[1]].is_promotable and abs(starting_pos[1]-destination_pos[1]) == 2:
                 self.pieces[destination_pos[0]][destination_pos[1]].can_be_captured_en_passant = True
         
+    def get_player_possible_moves(self, white):
+        moves = []
+        
+        for i in range(self.board_width):
+            for j in range(self.board_height):
+                if self.pieces[i][j] != 0 and not (self.pieces[i][j].is_white ^ white):
+                    pm = self.get_piece_possible_moves((i,j))
+                    for m in pm:
+                        moves.append(((i,j),m))
+        return moves
+
     def get_piece_possible_moves_raw(self, pos):
         x = self.pieces[pos[0]][pos[1]].get_possible_moves(self.pieces, (pos[0],pos[1]))
         
@@ -210,15 +221,12 @@ class Chessboard():
         
         return result
 
-    def check_for_promotion(self, player_is_white):
-        if player_is_white:
-            for i in range(self.board_width):
-                if self.pieces[i][self.board_height-1] != 0 and self.pieces[i][self.board_height-1].is_promotable:
-                    return self.board_width-i-1
-        else:
-            for i in range(self.board_width):
-                if self.pieces[i][0] != 0 and self.pieces[i][0].is_promotable:
-                    return i
+    def check_for_promotion(self):
+        for i in range(self.board_width):
+            if self.pieces[i][0] != 0 and self.pieces[i][0].is_promotable:
+                return i
+            if self.pieces[i][7] != 0 and self.pieces[i][7].is_promotable:
+                return i
 
         return None
 
@@ -370,14 +378,18 @@ class Chessboard():
 
     def render_promoting_ui(self, screen, player_is_white, view_as_white, promoting_cell):
         padding = self.board_padding
-        
-        if player_is_white ^ view_as_white:
-            y = self.pos_y + (self.cell_height* (self.board_height-2))
-        else:
-            promoting_cell = self.board_width-promoting_cell-1
-            y = self.pos_y
 
-        x = self.pos_x + promoting_cell*self.cell_width 
+        if not view_as_white:
+                promoting_cell = 7-promoting_cell
+
+        if player_is_white ^ view_as_white:
+            
+            y = self.pos_y + (self.cell_height* (self.board_height-2))
+            x = self.pos_x + (promoting_cell)*self.cell_width 
+        else:
+            #promoting_cell = self.board_width-promoting_cell-1
+            y = self.pos_y
+            x = self.pos_x + promoting_cell*self.cell_width 
         
         rect = pygame.Rect((x-padding,y-padding), (self.cell_width*2+padding*2, self.cell_width*2+padding*2))
         pygame.draw.rect(screen, (0,0,0), rect, 0)

@@ -3,14 +3,14 @@ from GUI.GUIitem import GUIItem
 
 class MaterialDisplayer(GUIItem):
     def __init__(self, box_size, sprites_size, padding, box_color, border_radius, spacings) -> None:
-        GUIItem.__init__(self=self, box_size=box_size, padding=padding, box_color=box_color, border_radius=border_radius)
+        super().__init__(box_size=box_size, padding=padding, box_color=box_color, border_radius=border_radius)
         self.__sprites_size = sprites_size
         self.__spacings = spacings
         self.__captured_material = []
         self.__values = {'q':9, 'r':5, 'b':3, 'n':3, 'p':1}
 
     def reset(self):
-        GUIItem.reset(self=self)
+        super().reset()
         self.__captured_material = []
 
     def __sort_material(self):
@@ -30,7 +30,7 @@ class MaterialDisplayer(GUIItem):
         return s
 
     def render(self, screen, position, font, sprites, material_advantage):
-        GUIItem.render(self=self,screen=screen,position=position)
+        super().render(screen=screen,position=position)
         
         x = position[0] + self.padding
         y = position[1] + self.box_size[1]//2 - self.__sprites_size//2
