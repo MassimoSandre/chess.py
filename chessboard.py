@@ -275,6 +275,68 @@ class Chessboard():
         
         return not self.has_legal_moves(stalemate_to_white)
 
+    def check_for_insufficient_mating_material(self):
+        white_material =''
+        white_count = []
+        black_material =''
+        black_count = []
+
+        for i in range(self.board_width):
+            for j in range(self.board_height):
+                if self.pieces[i][j] != 0 and not self.pieces[i][j].is_king:
+                    code = self.pieces[i][j].get_code().lower()
+                    if self.pieces[i][j].is_white:
+                        if not code  in white_material:
+                            white_material += code
+                            white_count.append(1)
+                        else:
+                            white_count[white_material.index(code)]+=1
+
+                    else:   
+                        if not code in black_material:
+                            black_material += code
+                            black_count.append(1)
+                        else:
+                            black_count[black_material.index(code)]+=1
+
+
+
+        if 'p' in white_material or 'r' in white_material or 'q' in white_material:
+            return False
+        elif 'p' in black_material or 'r' in black_material or 'q' in black_material:
+            return False
+        elif len(white_material) >= 2:
+            return False
+        elif len(black_material) >= 2:
+            return False
+        elif 'n' in white_material and white_count[white_material.index('n')] >= 2:
+            return False
+        elif 'n' in black_material and black_count[black_material.index('n')] >= 2:
+            return False
+        elif white_material == 'n' and (black_material == 'r' or black_material == 'b' or black_material == 'n' or black_material == 'p'):
+            return False
+        elif black_material == 'n' and (white_material == 'r' or white_material == 'b' or white_material == 'n' or white_material == 'p'):
+            return False
+        elif white_material == 'b' and (black_material == 'n' or black_material == 'p'):
+            return False
+        elif black_material == 'b' and (white_material == 'n' or white_material == 'p'):
+            return False
+        else:
+            bk = [False,False]  
+            for i in range(self.board_width):
+                for j in range(self.board_height):
+                    
+                    if self.pieces[i][j] != 0 and not self.pieces[i][j].is_king:
+                        code = self.pieces[i][j].get_code().lower()
+                        if code == 'b':
+                            bk[(i+j)%2] = True
+                    if bk[0] and bk[1]:
+                        return False
+
+        return True
+
+
+
     def render(self, screen, player_is_white):
         padding = self.board_padding
         rect = pygame.Rect((self.pos_x-padding,self.pos_y-padding),(self.cell_width*self.board_width+padding*2,self.cell_height*self.board_height+padding*2))

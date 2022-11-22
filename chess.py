@@ -9,6 +9,7 @@ from pieces.knight import Knight
 from pieces.bishop import Bishop
 from GUI.timer import Timer
 from GUI.material_displayer import MaterialDisplayer
+from GUI.scoreboard import Scoreboard
 
 class ChessGame:
     def __init__(self,*,grid_size=(8,8), cell_size=75, board_padding=10, board_colors=[(75, 81, 152),(151, 147, 204)], chessboard_size, margin=10, player_1, player_2,board_flipping=True, default_view_as_player_1=True) -> None:
@@ -30,6 +31,7 @@ class ChessGame:
         self.__load_sprites()
         self.set_timer_settings()
         self.set_material_displayer_settings()
+        self.set_scoreboard_settings()
         
         self.reset_game()
 
@@ -41,6 +43,8 @@ class ChessGame:
         self.__white_material_displayer = MaterialDisplayer(displayer_box_size, displayer_sprites_size, displayer_padding, displayer_box_color, displayer_border_radius, spacings)
         self.__black_material_displayer = MaterialDisplayer(displayer_box_size, displayer_sprites_size, displayer_padding, displayer_box_color, displayer_border_radius, spacings)
 
+    def set_scoreboard_settings(self, scoreboard_initial_values=(0,0,0), scoreboard_box_size=(40, 150), scoreboard_padding=10, scoreboard_box_color=(100,100,100), scoreboard_border_radius=4):
+        self.__scoreboard = Scoreboard(scoreboard_initial_values, scoreboard_box_size, scoreboard_padding, scoreboard_box_color, scoreboard_border_radius)
 
     def __load_sprites(self):
         self.__sprites = {}
@@ -103,6 +107,8 @@ class ChessGame:
         self.__white_player, self.__black_player = self.__black_player, self.__white_player
         self.__white_player.set_color(True)
         self.__black_player.set_color(False)
+
+        self.__scoreboard.flip_scores()
 
         self.__default_view_as_player_1 = not self.__default_view_as_player_1
         
@@ -293,13 +299,13 @@ class ChessGame:
             move+='+'
 
         self.__turn_switching = True
-        self.__last_move = [self.__starting_cell, destination_cell]
+        self.__last_move = [starting_cell, destination_cell]
         if self.__is_white_turn:
             self.__moves.append(str(self.__current_move) + '. ' + move + ' ')
         else:
             self.__moves[-1] += move
             self.__current_move+=1
-            print(self.__moves[-1])
+            #print(self.__moves[-1])
         
         self.__semimoves+=1
             
@@ -334,11 +340,18 @@ class ChessGame:
                 game = False
                 if self.__is_white_turn:
                     self.result = (1,0)
+                    self.__scoreboard.add_score((1,0,0))
                 else:
                     self.result = (0,1)
+                    self.__scoreboard.add_score((0,0,1))
             elif self.__board.check_for_stalemate(not self.__is_white_turn):
                 game = False
                 self.result = (0.5,0.5)
+                self.__scoreboard.add_score((0,1,0))
+            elif self.__board.check_for_insufficient_mating_material():
+                game = False
+                self.result = (0.5,0.5)
+                self.__scoreboard.add_score((0,1,0))
 
             if self.__is_white_turn:
                 self.__white_timer.make_move()
@@ -422,6 +435,9 @@ class ChessGame:
         bottom_material_displayer_pos = list(self.__board.get_rect().bottomleft)
         bottom_material_displayer_pos[1]+=self.__margin
 
+        scoreboard_pos = list(self.__board.get_rect().topright)
+        scoreboard_pos[0]+=self.__margin
+        scoreboard_pos[1]+=self.__board.get_rect().height//2 - self.__scoreboard.get_height()//2
 
         if self.__view_as_white:
             self.__white_timer.render(screen, bottom_timer_pos, timer_font)
@@ -435,3 +451,5 @@ class ChessGame:
 
             self.__white_material_displayer.render(screen, top_material_displayer_pos, displayer_font, self.__sprites, self.__white_material_advantage)
             self.__black_material_displayer.render(screen, bottom_material_displayer_pos, displayer_font, self.__sprites, -self.__white_material_advantage)
+
+        self.__scoreboard.render(screen, scoreboard_pos, self.__view_as_white, timer_font)

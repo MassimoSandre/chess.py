@@ -13,6 +13,7 @@ from players.computer_player import ComputerPlayer
 # - AI (stockfish 15)
 # - sort of evaluation
 # - collapse the online chess.py repository in here
+# - draws
 #
 # LOW PRIORITY
 # - themes
@@ -36,7 +37,7 @@ def main():
     pygame.font.init()
     clock = pygame.time.Clock()
 
-    player_1 = LocalPlayer()
+    player_1 = ComputerPlayer()
     player_2 = ComputerPlayer()
 
     game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding, player_1=player_1, player_2=player_2,board_flipping=False,default_view_as_player_1=True)
