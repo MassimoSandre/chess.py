@@ -37,8 +37,8 @@ def main():
     pygame.font.init()
     clock = pygame.time.Clock()
 
-    player_1 = ComputerPlayer()
-    player_2 = ComputerPlayer()
+    player_1 = LocalPlayer()
+    player_2 = LocalPlayer()
 
     game = ChessGame(chessboard_size=(height//2,height//2), board_padding=board_padding, player_1=player_1, player_2=player_2,board_flipping=False,default_view_as_player_1=True)
     game.set_timer_settings(timer_time_in_seconds=time_on_clock, timer_increment=timer_increment)
